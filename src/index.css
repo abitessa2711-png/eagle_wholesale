@@ -564,6 +564,25 @@ select option { background: #FFFFFF; color: #0A1931; }
   gap: 30px;
 }
 
+/* ─── DESKTOP TABLE VS MOBILE CARD TOGGLES ─────────────────── */
+.desktop-table-view {
+  display: block;
+}
+
+.mobile-card-list {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-item-card {
+  background: var(--card);
+  border: 1px solid rgba(26, 61, 99, 0.12);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 16px rgba(10, 25, 49, 0.03);
+}
+
 .menu-toggle-btn {
   display: none;
 }
@@ -573,6 +592,16 @@ select option { background: #FFFFFF; color: #0A1931; }
 }
 
 /* Tablet & Mobile Screens */
+@media (max-width: 768px) {
+  .desktop-table-view {
+    display: none !important;
+  }
+
+  .mobile-card-list {
+    display: flex !important;
+  }
+}
+
 @media (max-width: 1024px) {
   .menu-toggle-btn {
     display: inline-flex !important;

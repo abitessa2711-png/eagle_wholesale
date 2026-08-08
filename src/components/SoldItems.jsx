@@ -35,8 +35,8 @@ const SoldItems = ({ soldItems = [], onDeleteSale }) => {
         </div>
       </div>
 
-      {/* Table - Responsive Touch-Friendly Swipe */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      {/* Desktop View Table (hidden on mobile) */}
+      <div className="desktop-table-view card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="table-wrap">
           <table style={{ minWidth: '680px' }}>
             <thead>
@@ -88,6 +88,58 @@ const SoldItems = ({ soldItems = [], onDeleteSale }) => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile View Cards (100% Full Width, ZERO Sideways Scroll) */}
+      <div className="mobile-card-list">
+        {filtered.map((item, idx) => (
+          <div key={item.id || idx} className="mobile-item-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-sub)', fontWeight: 700 }}>#{idx + 1}</span>
+                <span className="fw-700" style={{ fontSize: '13px', color: 'var(--secondary)' }}>{item.billId}</span>
+              </div>
+              <span style={{ fontSize: '11px', color: 'var(--text-sub)' }}>
+                {new Date(item.date).toLocaleDateString('en-IN')}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+              <div>
+                <div className="fw-700" style={{ fontSize: '15px', color: 'var(--text-main)' }}>{item.variant}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-sub)' }}>
+                  👤 {item.customerName || 'Walk-in'} {item.category ? `• ${item.category}` : ''}
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>பில் தொகை</div>
+                <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A3D63' }}>₹{item.total?.toLocaleString('en-IN')}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px dashed var(--border)', paddingTop: 6 }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-sub)' }}>
+                எடை: <strong style={{ color: 'var(--text-main)' }}>{item.weight ? `${item.weight}g` : '-'}</strong> | அளவு: <strong style={{ color: 'var(--text-main)' }}>{item.quantity} pcs</strong>
+              </div>
+              <button
+                className="btn btn-danger-ghost"
+                style={{ padding: '4px 8px', height: '28px', fontSize: '11px' }}
+                onClick={() => {
+                  if (confirm('இந்தப் விற்பனைப் பதிவை நீக்க விரும்புகிறீர்களா? (Delete this sale entry?)')) {
+                    onDeleteSale && onDeleteSale(item.id)
+                  }
+                }}
+              >
+                <Trash2 size={13} /> நீக்கு
+              </button>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="card" style={{ textAlign: 'center', padding: 30, color: 'var(--text-sub)' }}>
+            விற்பனைப் பதிவுகள் எதுவும் இல்லை
+          </div>
+        )}
       </div>
     </div>
   )

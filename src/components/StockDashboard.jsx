@@ -44,8 +44,8 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
         </div>
       </div>
 
-      {/* Table - Responsive Touch-Friendly Swipe */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      {/* Desktop View Table (hidden on mobile) */}
+      <div className="desktop-table-view card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="table-wrap">
           <table style={{ minWidth: '640px' }}>
             <thead>
@@ -101,6 +101,78 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile View Cards (100% Full Width, ZERO Sideways Scroll) */}
+      <div className="mobile-card-list">
+        {filtered.map((p, idx) => {
+          const unitWeight = p.weight || 0
+          const qty = p.quantity || 0
+          const totalWt = qty * unitWeight
+
+          return (
+            <div key={p.id || idx} className="mobile-item-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <div style={{ flex: 1, paddingRight: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-sub)', fontWeight: 700 }}>#{idx + 1}</span>
+                    <span className="fw-700" style={{ fontSize: '15px', color: 'var(--text-main)' }}>{p.variant}</span>
+                    <span className="badge badge-blue">{p.category}</span>
+                  </div>
+                  {(p.subcategory || p.detail) && (
+                    <div style={{ fontSize: '12px', color: 'var(--text-sub)' }}>
+                      {p.subcategory} {p.detail ? `• ${p.detail}` : ''}
+                    </div>
+                  )}
+                </div>
+                {role === 'admin' && (
+                  <button
+                    className="btn btn-danger-ghost"
+                    onClick={() => {
+                      if (confirm(`"${p.variant}" இருப்பை நீக்க விரும்புகிறீர்களா?`)) {
+                        onDelete && onDelete(p.id)
+                      }
+                    }}
+                    title="நீக்கு (Delete)"
+                    style={{ padding: '6px 8px', height: '32px' }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+
+              {/* 3 Metric Box */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1.2fr',
+                gap: 6,
+                background: 'rgba(26, 61, 99, 0.06)',
+                border: '1px solid rgba(26, 61, 99, 0.10)',
+                borderRadius: 10,
+                padding: '8px 10px',
+                textAlign: 'center'
+              }}>
+                <div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>தனி எடை</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>{unitWeight > 0 ? `${unitWeight}g` : '-'}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>எண்ணிக்கை</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{qty} pcs</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>மொத்த எடை</div>
+                  <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A3D63' }}>{totalWt > 0 ? `${totalWt.toFixed(2)}g` : '-'}</div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+        {filtered.length === 0 && (
+          <div className="card" style={{ textAlign: 'center', padding: 30, color: 'var(--text-sub)' }}>
+            பொருட்கள் எதுவும் இல்லை
+          </div>
+        )}
       </div>
     </div>
   )
