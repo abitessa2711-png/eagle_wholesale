@@ -28,23 +28,39 @@ export default function App() {
 
   // ── Standalone State (Browser localStorage + Supabase Sync) ───────────────
   const [products, setProducts]   = useState(() => {
-    const saved = localStorage.getItem('eagle_products_v3')
-    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS
+    try {
+      const saved = localStorage.getItem('eagle_products_v3')
+      return saved ? JSON.parse(saved) : INITIAL_PRODUCTS
+    } catch {
+      return INITIAL_PRODUCTS
+    }
   })
 
   const [soldItems, setSoldItems] = useState(() => {
-    const saved = localStorage.getItem('eagle_sales_v3')
-    return saved ? JSON.parse(saved) : INITIAL_SALES
+    try {
+      const saved = localStorage.getItem('eagle_sales_v3')
+      return saved ? JSON.parse(saved) : INITIAL_SALES
+    } catch {
+      return INITIAL_SALES
+    }
   })
 
   const [buybacks, setBuybacks]   = useState(() => {
-    const saved = localStorage.getItem('eagle_buybacks_v3')
-    return saved ? JSON.parse(saved) : INITIAL_BUYBACKS
+    try {
+      const saved = localStorage.getItem('eagle_buybacks_v3')
+      return saved ? JSON.parse(saved) : INITIAL_BUYBACKS
+    } catch {
+      return INITIAL_BUYBACKS
+    }
   })
 
   const [serviceEntries, setServiceEntries] = useState(() => {
-    const saved = localStorage.getItem('eagle_services_v3')
-    return saved ? JSON.parse(saved) : []
+    try {
+      const saved = localStorage.getItem('eagle_services_v3')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
   })
 
   // Initial Supabase Sync on load
