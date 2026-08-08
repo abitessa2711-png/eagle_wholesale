@@ -14,14 +14,8 @@ import { INITIAL_PRODUCTS, INITIAL_SALES, INITIAL_BUYBACKS, INITIAL_LEDGER } fro
 import { supabase, fetchSupabaseData, insertSupabaseRecord } from './supabaseClient'
 
 export default function App() {
-  // ── Auth ───────────────────────────────────────────────────────────────────
-  const [user, setUser]                 = useState({
-    id: 'eagle-admin',
-    name: 'Eagle Admin',
-    email: 'admin@eagle.com',
-    role: 'admin',
-    token: 'eagle-token'
-  })
+  // ── Auth (Requires Login by default) ───────────────────────────────────────
+  const [user, setUser]                 = useState(null)
   const [showSignup, setShowSignup]     = useState(false)
   const [activeTab, setActiveTab]       = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
