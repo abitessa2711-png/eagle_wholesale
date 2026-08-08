@@ -7,9 +7,10 @@ const SellDashboard = ({ products = [], processSale }) => {
   const [mobile, setMobile]             = useState('')
   const [goldRate, setGoldRate]         = useState('')
   const [silverRate, setSilverRate]     = useState('')
-  const [oldSilverAmount, setOldSilverAmount] = useState('')
-  const [oldGoldAmount, setOldGoldAmount]     = useState('')
+  const [oldGoldWeight, setOldGoldWeight] = useState('')
+  const [oldGoldAmount, setOldGoldAmount] = useState('')
   const [oldSilverWeight, setOldSilverWeight] = useState('')
+  const [oldSilverAmount, setOldSilverAmount] = useState('')
   const [cart, setCart]                 = useState([])
   
   const [selectedProductId, setSelectedProductId] = useState('')
@@ -135,15 +136,17 @@ const SellDashboard = ({ products = [], processSale }) => {
     setError('')
 
     try {
-      const billData = await processSale(customerName, mobile, cart, goldRate, silverRate, oldSilverAmount, oldGoldAmount)
+      const billData = await processSale(customerName, mobile, cart, goldRate, silverRate, oldSilverAmount, oldSilverWeight, oldGoldAmount, oldGoldWeight)
       setCompletedBill(billData)
       setCart([])
       setCustomerName('')
       setMobile('')
       setGoldRate('')
       setSilverRate('')
-      setOldSilverAmount('')
+      setOldGoldWeight('')
       setOldGoldAmount('')
+      setOldSilverWeight('')
+      setOldSilverAmount('')
     } catch (err) {
       setError(err.message || 'விற்பனை செயலாக்கத்தில் பிழை')
     } finally {
@@ -192,7 +195,7 @@ const SellDashboard = ({ products = [], processSale }) => {
         <div className="card">
           <div className="card-title">1. பொருள் தேர்வு (Select Item)</div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div className="form-group">
               <label>வாடிக்கையாளர் பெயர் (Customer Name)</label>
               <input
@@ -213,7 +216,8 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+          {/* Today's Rate */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div className="form-group">
               <label>இன்றைய தங்கம் விலை (Gold 1g ₹)</label>
               <input
@@ -234,9 +238,20 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+          {/* Old Gold Deduction */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div className="form-group">
-              <label>பழைய தங்கம் கழிப்பு (Old Gold Amount ₹)</label>
+              <label>பழைய தங்கம் எடை (Old Gold Wt g)</label>
+              <input
+                type="number"
+                step="0.001"
+                placeholder="எ.கா. 8.500"
+                value={oldGoldWeight}
+                onChange={e => setOldGoldWeight(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label>பழைய தங்கம் கழிப்பு (Old Gold Less ₹)</label>
               <input
                 type="number"
                 placeholder="எ.கா. 2000"
@@ -244,8 +259,22 @@ const SellDashboard = ({ products = [], processSale }) => {
                 onChange={e => setOldGoldAmount(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Old Silver Deduction */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
             <div className="form-group">
-              <label>பழைய வெள்ளி கழிப்பு (Old Silver Amount ₹)</label>
+              <label>பழைய வெள்ளி எடை (Old Silver Wt g)</label>
+              <input
+                type="number"
+                step="0.001"
+                placeholder="எ.கா. 25.500"
+                value={oldSilverWeight}
+                onChange={e => setOldSilverWeight(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label>பழைய வெள்ளி கழிப்பு (Old Silver Less ₹)</label>
               <input
                 type="number"
                 placeholder="எ.கா. 1500"

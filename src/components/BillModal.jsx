@@ -29,9 +29,10 @@ const BillModal = ({ bill, onClose }) => {
 
   const [goldRate, setGoldRate] = useState(bill.goldRate || '')
   const [silverRate, setSilverRate] = useState(bill.silverRate || '')
+  const [oldGoldWeight, setOldGoldWeight] = useState(bill.oldGoldWeight || '')
+  const [oldGoldAmount, setOldGoldAmount] = useState(bill.oldGoldAmount || '')
   const [oldSilverWeight, setOldSilverWeight] = useState(bill.oldSilverWeight || '')
   const [oldSilverAmount, setOldSilverAmount] = useState(bill.oldSilverAmount || '')
-  const [oldGoldAmount, setOldGoldAmount] = useState(bill.oldGoldAmount || '')
 
   const handlePrint = () => {
     const printElement = document.getElementById('printable-sales-bill')
@@ -232,13 +233,14 @@ const BillModal = ({ bill, onClose }) => {
                 </div>
               </div>
 
-              {/* Gold & Silver Rate Row — no emoji, only if rate typed */}
-              {(goldRate || silverRate || oldGoldAmount || oldSilverAmount) && (
+              {/* Gold, Silver, Old Gold & Old Silver Rate Row — no emoji */}
+              {(goldRate || silverRate || oldGoldAmount || oldGoldWeight || oldSilverAmount || oldSilverWeight) && (
                 <div
                   className="rate-row"
                   style={{
                     display: 'flex',
-                    gap: 20,
+                    gap: 16,
+                    flexWrap: 'wrap',
                     fontSize: '10px',
                     fontWeight: 700,
                     color: '#0F3D34',
@@ -254,8 +256,12 @@ const BillModal = ({ bill, onClose }) => {
                   <span>Today's Rate / இன்றைய விலை:</span>
                   {goldRate && <span>Gold (தங்கம்): Rs.{goldRate}/g</span>}
                   {silverRate && <span>Silver (வெள்ளி): Rs.{silverRate}/g</span>}
-                  {oldGoldAmount && <span>Old Gold (பழைய தங்கம்): Rs.{oldGoldAmount}</span>}
-                  {oldSilverAmount && <span>Old Silver (பழைய வெள்ளி): Rs.{oldSilverAmount}</span>}
+                  {(oldGoldAmount || oldGoldWeight) && (
+                    <span>Old Gold (பழைய தங்கம்): {oldGoldWeight ? `${oldGoldWeight}g` : ''} {oldGoldAmount ? `(-Rs.${oldGoldAmount})` : ''}</span>
+                  )}
+                  {(oldSilverAmount || oldSilverWeight) && (
+                    <span>Old Silver (பழைய வெள்ளி): {oldSilverWeight ? `${oldSilverWeight}g` : ''} {oldSilverAmount ? `(-Rs.${oldSilverAmount})` : ''}</span>
+                  )}
                 </div>
               )}
 
@@ -378,7 +384,7 @@ const BillModal = ({ bill, onClose }) => {
                   )}
                   {(parseFloat(oldGoldAmount) || 0) > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3, color: '#c00', fontWeight: 700 }}>
-                      <span>பழைய தங்கம் கழிப்பு (Less Old Gold):</span>
+                      <span>பழைய தங்கம் கழிப்பு (Less Old Gold {oldGoldWeight ? `[${oldGoldWeight}g]` : ''}):</span>
                       <span>-Rs.{parseFloat(oldGoldAmount).toLocaleString('en-IN')}</span>
                     </div>
                   )}

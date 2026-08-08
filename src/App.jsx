@@ -153,7 +153,7 @@ export default function App() {
   }
 
   // ── Sale Processing ────────────────────────────────────────────────────────
-  const processSale = async (customerName, mobile, cartItems, goldRate = '', silverRate = '', oldSilverAmount = '', oldGoldAmount = '') => {
+  const processSale = async (customerName, mobile, cartItems, goldRate = '', silverRate = '', oldSilverAmount = '', oldSilverWeight = '', oldGoldAmount = '', oldGoldWeight = '') => {
     const billNo = String(Math.floor(100 + Math.random() * 900))
     const billId = `ESW-${billNo}`
     const date = new Date().toISOString()
@@ -216,7 +216,9 @@ export default function App() {
       goldRate,
       silverRate,
       oldSilverAmount,
-      oldGoldAmount
+      oldSilverWeight,
+      oldGoldAmount,
+      oldGoldWeight
     }
   }
 
