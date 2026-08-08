@@ -190,7 +190,7 @@ const SellDashboard = ({ products = [], processSale }) => {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="layout-split-grid">
         {/* Customer & Item Selection Form */}
         <div className="card">
           <div className="card-title">1. பொருள் தேர்வு (Select Item)</div>
@@ -313,7 +313,7 @@ const SellDashboard = ({ products = [], processSale }) => {
               </select>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
+            <div className="sell-inputs-grid" style={{ marginBottom: 16 }}>
               <div className="form-group">
                 <label style={{ fontSize: '11.5px' }}>எண்ணிக்கை (Qty)</label>
                 <input
