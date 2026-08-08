@@ -35,21 +35,21 @@ const SoldItems = ({ soldItems = [], onDeleteSale }) => {
         </div>
       </div>
 
-      {/* Table - Fitted 100% to window without horizontal scroll cutoff */}
+      {/* Table - Responsive Touch-Friendly Swipe */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="table-wrap">
-          <table style={{ width: '100%', tableLayout: 'fixed' }}>
+          <table style={{ minWidth: '680px' }}>
             <thead>
               <tr>
-                <th style={{ width: '6%', textAlign: 'center' }}>S.NO</th>
-                <th style={{ width: '14%', textAlign: 'left' }}>பில் எண் (BILL ID)</th>
-                <th style={{ width: '12%', textAlign: 'left' }}>தேதி (DATE)</th>
-                <th style={{ width: '16%', textAlign: 'left' }}>வாடிக்கையாளர்</th>
-                <th style={{ width: '22%', textAlign: 'left' }}>பொருள் (VARIANT)</th>
-                <th style={{ width: '10%', textAlign: 'right' }}>எடை (WEIGHT)</th>
-                <th style={{ width: '5%', textAlign: 'center' }}>QTY</th>
-                <th style={{ width: '10%', textAlign: 'right' }}>மொத்தம்</th>
-                <th style={{ width: '5%', textAlign: 'center' }}></th>
+                <th style={{ width: '45px', textAlign: 'center' }}>S.NO</th>
+                <th style={{ minWidth: '100px', textAlign: 'left' }}>பில் எண் (BILL ID)</th>
+                <th style={{ minWidth: '95px', textAlign: 'left' }}>தேதி (DATE)</th>
+                <th style={{ minWidth: '110px', textAlign: 'left' }}>வாடிக்கையாளர்</th>
+                <th style={{ minWidth: '130px', textAlign: 'left' }}>பொருள் (VARIANT)</th>
+                <th style={{ minWidth: '85px', textAlign: 'right' }}>எடை (WEIGHT)</th>
+                <th style={{ minWidth: '55px', textAlign: 'center' }}>QTY</th>
+                <th style={{ minWidth: '90px', textAlign: 'right' }}>மொத்தம்</th>
+                <th style={{ width: '45px', textAlign: 'center' }}></th>
               </tr>
             </thead>
             <tbody>

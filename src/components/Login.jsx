@@ -95,16 +95,19 @@ const Login = ({ onLogin, onShowSignup }) => {
       <div style={{
         position: 'relative',
         zIndex: 2,
-        width: '390px',
+        width: '100%',
+        maxWidth: '390px',
+        margin: '0 16px',
         background: 'rgba(10, 25, 49, 0.78)',
         backdropFilter: 'blur(28px)',
         WebkitBackdropFilter: 'blur(28px)',
         borderRadius: '30px',
         border: '1px solid rgba(179, 207, 229, 0.25)',
         boxShadow: '0 25px 70px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(179, 207, 229, 0.35)',
-        padding: '46px 38px 40px',
+        padding: '36px 24px 32px',
         textAlign: 'center',
-        color: '#F6FAFD'
+        color: '#F6FAFD',
+        boxSizing: 'border-box'
       }}>
         {/* Logo */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>

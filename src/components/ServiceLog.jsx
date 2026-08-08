@@ -532,14 +532,14 @@ const ServiceLog = ({ serviceEntries = [], onAddService, onDeleteService }) => {
             <input type="text" placeholder="பொருள், பெயர் அல்லது மொபைல் தேட..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 34, height: 36 }} />
           </div>
           <div className="table-wrap" style={{ maxHeight: '380px', overflowY: 'auto' }}>
-            <table style={{ width: '100%', tableLayout: 'fixed' }}>
+            <table style={{ minWidth: '560px' }}>
               <thead>
                 <tr>
-                  <th style={{ width: '18%', textAlign: 'left' }}>தேதி (DATE)</th>
-                  <th style={{ width: '34%', textAlign: 'left' }}>பொருள் / வாடிக்கையாளர்</th>
-                  <th style={{ width: '20%', textAlign: 'left' }}>சேவை (SERVICE)</th>
-                  <th style={{ width: '16%', textAlign: 'right' }}>தொகை</th>
-                  <th style={{ width: '12%', textAlign: 'center' }}>செயல்</th>
+                  <th style={{ minWidth: '90px', textAlign: 'left' }}>தேதி (DATE)</th>
+                  <th style={{ minWidth: '160px', textAlign: 'left' }}>பொருள் / வாடிக்கையாளர்</th>
+                  <th style={{ minWidth: '120px', textAlign: 'left' }}>சேவை (SERVICE)</th>
+                  <th style={{ minWidth: '90px', textAlign: 'right' }}>தொகை</th>
+                  <th style={{ width: '50px', textAlign: 'center' }}>செயல்</th>
                 </tr>
               </thead>
               <tbody>

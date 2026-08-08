@@ -44,20 +44,20 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
         </div>
       </div>
 
-      {/* Table - Strictly aligned to window width with ZERO horizontal scrollbar */}
+      {/* Table - Responsive Touch-Friendly Swipe */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ width: '100%', overflowX: 'hidden' }}>
-          <table style={{ width: '100%', tableLayout: 'fixed' }}>
+        <div className="table-wrap">
+          <table style={{ minWidth: '640px' }}>
             <thead>
               <tr>
-                <th style={{ width: '5%', textAlign: 'center' }}>#</th>
-                <th style={{ width: '25%', textAlign: 'left' }}>பொருள் (Variant)</th>
-                <th style={{ width: '15%', textAlign: 'left' }}>பிரிவு</th>
-                <th style={{ width: '15%', textAlign: 'left' }}>உட்பிரிவு</th>
-                <th style={{ width: '12%', textAlign: 'right' }}>எடை (g)</th>
-                <th style={{ width: '13%', textAlign: 'center' }}>எண்ணிக்கை</th>
-                <th style={{ width: '15%', textAlign: 'right' }}>மொத்த எடை</th>
-                {role === 'admin' && <th style={{ width: '60px', textAlign: 'center' }}></th>}
+                <th style={{ width: '40px', textAlign: 'center' }}>#</th>
+                <th style={{ minWidth: '160px', textAlign: 'left' }}>பொருள் (Variant)</th>
+                <th style={{ minWidth: '100px', textAlign: 'left' }}>பிரிவு</th>
+                <th style={{ minWidth: '100px', textAlign: 'left' }}>உட்பிரிவு</th>
+                <th style={{ minWidth: '80px', textAlign: 'right' }}>எடை (g)</th>
+                <th style={{ minWidth: '80px', textAlign: 'center' }}>எண்ணிக்கை</th>
+                <th style={{ minWidth: '90px', textAlign: 'right' }}>மொத்த எடை</th>
+                {role === 'admin' && <th style={{ width: '50px', textAlign: 'center' }}></th>}
               </tr>
             </thead>
             <tbody>
