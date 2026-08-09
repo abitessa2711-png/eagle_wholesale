@@ -11,7 +11,7 @@ import StockDashboard from './components/StockDashboard'
 import OldBuyback     from './components/OldBuyback'
 import ServiceLog     from './components/ServiceLog'
 import { INITIAL_PRODUCTS, INITIAL_SALES, INITIAL_BUYBACKS, INITIAL_LEDGER } from './data/initialData'
-import { supabase, fetchSupabaseData, insertSupabaseRecord } from './supabaseClient'
+import { supabase, fetchSupabaseData, insertSupabaseRecord, deleteSupabaseRecord, clearSupabaseTable } from './supabaseClient'
 
 export default function App() {
   // ── Auth (Requires Login by default) ───────────────────────────────────────
@@ -20,10 +20,10 @@ export default function App() {
   const [activeTab, setActiveTab]       = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  // ── Standalone State (Fresh Clean Client Database) ─────────────────────────
+  // ── Client Production State (100% Clean Fresh Launch) ──────────────────────
   const [products, setProducts]   = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_client_v1_products')
+      const saved = localStorage.getItem('eagle_wholesale_production_store_v1_products')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -32,7 +32,7 @@ export default function App() {
 
   const [soldItems, setSoldItems] = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_client_v1_sales')
+      const saved = localStorage.getItem('eagle_wholesale_production_store_v1_sales')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -41,7 +41,7 @@ export default function App() {
 
   const [buybacks, setBuybacks]   = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_client_v1_buybacks')
+      const saved = localStorage.getItem('eagle_wholesale_production_store_v1_buybacks')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -50,63 +50,61 @@ export default function App() {
 
   const [serviceEntries, setServiceEntries] = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_client_v1_services')
+      const saved = localStorage.getItem('eagle_wholesale_production_store_v1_services')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
     }
   })
 
-  // Initial Supabase Sync on load (if configured)
-  useEffect(() => {
-    async function loadSupabaseData() {
-      const dbProducts = await fetchSupabaseData('products')
-      if (dbProducts && dbProducts.length > 0) setProducts(dbProducts)
-
-      const dbSales = await fetchSupabaseData('sales')
-      if (dbSales && dbSales.length > 0) setSoldItems(dbSales)
-
-      const dbBuybacks = await fetchSupabaseData('buybacks')
-      if (dbBuybacks && dbBuybacks.length > 0) setBuybacks(dbBuybacks)
-
-      const dbServices = await fetchSupabaseData('services')
-      if (dbServices && dbServices.length > 0) setServiceEntries(dbServices)
-    }
-    loadSupabaseData()
-  }, [])
-
   // Save changes locally
   useEffect(() => {
-    localStorage.setItem('eagle_wholesale_client_v1_products', JSON.stringify(products))
+    localStorage.setItem('eagle_wholesale_production_store_v1_products', JSON.stringify(products))
   }, [products])
 
   useEffect(() => {
-    localStorage.setItem('eagle_wholesale_client_v1_sales', JSON.stringify(soldItems))
+    localStorage.setItem('eagle_wholesale_production_store_v1_sales', JSON.stringify(soldItems))
   }, [soldItems])
 
   useEffect(() => {
-    localStorage.setItem('eagle_wholesale_client_v1_buybacks', JSON.stringify(buybacks))
+    localStorage.setItem('eagle_wholesale_production_store_v1_buybacks', JSON.stringify(buybacks))
   }, [buybacks])
 
   useEffect(() => {
-    localStorage.setItem('eagle_wholesale_client_v1_services', JSON.stringify(serviceEntries))
+    localStorage.setItem('eagle_wholesale_production_store_v1_services', JSON.stringify(serviceEntries))
   }, [serviceEntries])
 
   const handleLogout = () => {
     setUser(null)
   }
 
-  const handleResetAllData = () => {
-    if (confirm('அனைத்து டெமோ/டெஸ்ட் பதிவுகளையும் நீக்கி புதிய நிலைக்கு ரீசெட் செய்ய விரும்புகிறீர்களா? (Clear all data for clean client launch?)')) {
+  const handleResetAllData = async () => {
+    if (confirm('அனைத்து டெமோ/டெஸ்ட் பதிவுகளையும் நீக்கி கிளைண்டிற்குத் தூய்மையான தொடக்கத்திற்கு மாற்ற விரும்புகிறீர்களா? (Clear all data for clean client launch?)')) {
+      // Clear localStorage
+      localStorage.removeItem('eagle_wholesale_production_store_v1_products')
+      localStorage.removeItem('eagle_wholesale_production_store_v1_sales')
+      localStorage.removeItem('eagle_wholesale_production_store_v1_buybacks')
+      localStorage.removeItem('eagle_wholesale_production_store_v1_services')
       localStorage.removeItem('eagle_wholesale_client_v1_products')
       localStorage.removeItem('eagle_wholesale_client_v1_sales')
       localStorage.removeItem('eagle_wholesale_client_v1_buybacks')
       localStorage.removeItem('eagle_wholesale_client_v1_services')
+      localStorage.removeItem('eagle_products_v3')
+      localStorage.removeItem('eagle_sales_v3')
+      localStorage.removeItem('eagle_buybacks_v3')
+      localStorage.removeItem('eagle_services_v3')
+
+      // Clear Remote Tables
+      await clearSupabaseTable('products')
+      await clearSupabaseTable('sales')
+      await clearSupabaseTable('buybacks')
+      await clearSupabaseTable('services')
+
       setProducts([])
       setSoldItems([])
       setBuybacks([])
       setServiceEntries([])
-      alert('அனைத்து பதிவுகளும் முழுமையாக நீக்கப்பட்டுவிட்டன! (All data cleared successfully)')
+      alert('அனைத்து பதிவுகளும் முழுமையாக நீக்கப்பட்டுவிட்டன! கிளைண்ட் புதிய சரக்குகளைப் பதிவு செய்யலாம்.')
     }
   }
 

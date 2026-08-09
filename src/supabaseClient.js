@@ -59,5 +59,20 @@ export const deleteSupabaseRecord = async (table, id) => {
   }
 }
 
+export const clearSupabaseTable = async (table) => {
+  try {
+    if (!supabase) return null
+    const { data, error } = await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    if (error) {
+      console.warn(`Supabase clear error for ${table}:`, error.message)
+      return null
+    }
+    return data
+  } catch (err) {
+    console.warn(`Supabase clear exception for ${table}:`, err.message)
+    return null
+  }
+}
+
 export { supabase }
 export default supabase
