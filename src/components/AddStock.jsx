@@ -19,6 +19,8 @@ const AddStock = ({ onAddProduct }) => {
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
 
+  const isKodi = formData.category === 'கொடி'
+
   const getSubs = () => {
     if (!formData.category || !MASTER_DATA[formData.category]) return []
     return Object.keys(MASTER_DATA[formData.category])
@@ -69,7 +71,7 @@ const AddStock = ({ onAddProduct }) => {
         variant: variantName,
         detail: formData.detail || "",
         weight: parseFloat(formData.weight || 0),
-        quantity: parseInt(formData.quantity || 1),
+        quantity: isKodi ? 1 : parseInt(formData.quantity || 1),
         customDate: new Date(formData.date).toISOString()
       })
 
@@ -124,7 +126,7 @@ const AddStock = ({ onAddProduct }) => {
               <label>1. முக்கியப் பிரிவு (Main Category) *</label>
               <select 
                 value={formData.category} 
-                onChange={e => setFormData({ ...formData, category: e.target.value, subcategory: '', variant: '', detail: '', weight: '' })} 
+                onChange={e => setFormData({ ...formData, category: e.target.value, subcategory: '', variant: '', detail: '', weight: '', quantity: e.target.value === 'கொடி' ? '1' : formData.quantity })} 
                 required
               >
                 <option value="">— பிரிவு தேர்வு செய்க —</option>
@@ -177,7 +179,7 @@ const AddStock = ({ onAddProduct }) => {
           {/* Row 2: Variant & Detail */}
           <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
             <div className="form-group">
-              <label>3. மாடல் / அளவு (Variant / Size) *</label>
+              <label>{isKodi ? '3. கொடி ரோல் வகை / அளவு (Roll Type / Inch)' : '3. மாடல் / அளவு (Variant / Size)'} *</label>
               {availableVariants.length > 0 ? (
                 <select 
                   value={formData.variant} 
@@ -185,14 +187,14 @@ const AddStock = ({ onAddProduct }) => {
                   disabled={!formData.subcategory}
                   required
                 >
-                  <option value="">— மாடல் / அளவு —</option>
+                  <option value="">— {isKodi ? 'கொடி ரோல் வகை தேர்வு' : 'மாடல் / அளவு தேர்வு'} —</option>
                   {availableVariants.map(v => <option key={v} value={v}>{v}</option>)}
                   <option value="__other__">+ புதிய மாடல் (Custom)...</option>
                 </select>
               ) : (
                 <input
                   type="text"
-                  placeholder="மாடல் பெயர் (e.g. 10.5 கொலுசு)..."
+                  placeholder={isKodi ? "கொடி ரோல் மாடல் பெயர்..." : "மாடல் பெயர் (e.g. 10.5 கொலுசு)..."}
                   value={customVariant}
                   onChange={e => {
                     setCustomVariant(e.target.value)
@@ -205,7 +207,7 @@ const AddStock = ({ onAddProduct }) => {
             </div>
 
             <div className="form-group">
-              <label>4. கூடுதல் விவரம் / முத்து (Detail / Pearls)</label>
+              <label>4. கூடுதல் விவரம் / குறிப்பு (Detail / Note)</label>
               {availableDetails.length > 0 ? (
                 <select 
                   value={formData.detail} 
@@ -217,7 +219,7 @@ const AddStock = ({ onAddProduct }) => {
               ) : (
                 <input
                   type="text"
-                  placeholder="விவரம் (e.g. 1 முத்து, சிங்கிள் பட்டி...)"
+                  placeholder={isKodi ? "ரோல் குறிப்பு (e.g. 1 inch 1.200g மில்லி)..." : "விவரம் (e.g. 1 முத்து, சிங்கிள் பட்டி...)"}
                   value={formData.detail}
                   onChange={e => setFormData({ ...formData, detail: e.target.value })}
                 />
@@ -240,25 +242,37 @@ const AddStock = ({ onAddProduct }) => {
 
           {/* Row 3: Quantity & Total Weight */}
           <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
-            <div className="form-group">
-              <label>5. மொத்த எண்ணிக்கை (Total Quantity in pcs) *</label>
-              <input 
-                type="number" 
-                min="1"
-                placeholder="எ.கா. 20"
-                value={formData.quantity}
-                onChange={e => setFormData({ ...formData, quantity: e.target.value })}
-                required 
-              />
-            </div>
+            {isKodi ? (
+              <div className="form-group">
+                <label>5. சரக்கு வகை (Stock Format)</label>
+                <input 
+                  type="text" 
+                  value="🌀 கொடி ரோல் (Continuous Roll - Cut by Weight)"
+                  disabled 
+                  style={{ background: 'rgba(200, 169, 106, 0.08)', color: 'var(--gold)', fontWeight: 700 }}
+                />
+              </div>
+            ) : (
+              <div className="form-group">
+                <label>5. மொத்த எண்ணிக்கை (Total Quantity in pcs) *</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  placeholder="எ.கா. 20"
+                  value={formData.quantity}
+                  onChange={e => setFormData({ ...formData, quantity: e.target.value })}
+                  required 
+                />
+              </div>
+            )}
 
             <div className="form-group">
-              <label>6. மொத்த எடை (Total Batch Weight in grams) *</label>
+              <label>{isKodi ? '6. மொத்த ரோல் எடை (Total Roll Weight in grams) *' : '6. மொத்த எடை (Total Batch Weight in grams) *'}</label>
               <input 
                 type="number" 
                 step="0.001" 
                 min="0"
-                placeholder="எ.கா. 600.000"
+                placeholder="எ.கா. 500.000"
                 value={formData.weight}
                 onChange={e => setFormData({ ...formData, weight: e.target.value })}
                 required
@@ -279,7 +293,7 @@ const AddStock = ({ onAddProduct }) => {
 
           <div>
             <button type="submit" className="btn btn-gold btn-full btn-lg" disabled={loading} style={{ height: '44px', fontSize: '14.5px', fontWeight: 800 }}>
-              <Plus size={18} /> {loading ? 'சேமிக்கப்படுகிறது...' : '+ சரக்கு இருப்பில் சேர் (Add Stock to Inventory)'}
+              <Plus size={18} /> {loading ? 'சேமிக்கப்படுகிறது...' : (isKodi ? '+ கொடி ரோல் இருப்பில் சேர் (Add Kodi Roll to Stock)' : '+ சரக்கு இருப்பில் சேர் (Add Stock to Inventory)')}
             </button>
           </div>
         </form>
@@ -287,7 +301,11 @@ const AddStock = ({ onAddProduct }) => {
       
       <div style={{ marginTop: 12, background: 'rgba(229,184,105,0.06)', border: '1px dashed var(--gold)', padding: '10px 14px', borderRadius: 10 }}>
         <p style={{ fontSize: '11.5px', color: 'var(--text-sub)', textAlign: 'center', margin: 0, lineHeight: 1.4 }}>
-          💡 <strong>ஹோல்சேல் முறை:</strong> இங்கு உள்ளிடும் எடை என்பது மொத்த எண்ணிக்கைக்கான மொத்த எடை (Total Batch Weight) ஆகும். (உதாரணம்: 20 கொலுசுக்கு மொத்த எடை 600g).
+          {isKodi ? (
+            <span>💡 <strong>கொடி ரோல் முறை:</strong> கொடி வகைகளுக்கு எண்ணிக்கை (Pcs) தேவையில்லை. ரோலின் மொத்த எடையை மட்டும் உள்ளிட்டுச் சேர்க்கலாம். விற்பனையின் போது தேவையான எடையை கட் செய்து பில் செய்யலாம்.</span>
+          ) : (
+            <span>💡 <strong>ஹோல்சேல் முறை:</strong> இங்கு உள்ளிடும் எடை என்பது மொத்த எண்ணிக்கைக்கான மொத்த எடை (Total Batch Weight) ஆகும். (உதாரணம்: 20 கொலுசுக்கு மொத்த எடை 600g).</span>
+          )}
         </p>
       </div>
     </div>

@@ -1,51 +1,71 @@
 import React, { useState } from 'react'
-import { Package, Trash2, Search } from 'lucide-react'
+import { Search, Trash2, Package } from 'lucide-react'
 
 const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
-  const [search, setSearch] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('All')
 
-  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)))
+  const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))]
 
   const filtered = products.filter(p => {
-    const matchesSearch = p.variant?.toLowerCase().includes(search.toLowerCase()) ||
-                          p.category?.toLowerCase().includes(search.toLowerCase()) ||
-                          p.detail?.toLowerCase().includes(search.toLowerCase())
-    const matchesCategory = !categoryFilter || p.category === categoryFilter
-    return matchesSearch && matchesCategory
+    const matchesSearch = 
+      p.variant?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.subcategory?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.detail?.toLowerCase().includes(searchTerm.toLowerCase())
+
+    const matchesCat = selectedCategory === 'All' || p.category === selectedCategory
+    return matchesSearch && matchesCat
   })
 
+  // Total Statistics
+  const totalStockQty = products.filter(p => p.category !== 'கொடி').reduce((sum, p) => sum + (p.quantity || 0), 0)
+  const totalStockRolls = products.filter(p => p.category === 'கொடி').length
+  const totalStockWeight = products.reduce((sum, p) => sum + (p.weight || 0), 0)
+
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div className="flex-between mb-16">
         <div>
-          <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>இருப்பு பட்டியல் (Stock List)</h2>
-          <p className="text-sub">Total {products.length} Products in Inventory</p>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
+            இருப்புப் பட்டியல் (Stock Inventory)
+          </h2>
+          <p className="text-sub">
+            மொத்த சரக்கு: <strong style={{ color: 'var(--text-main)' }}>{totalStockQty} pcs {totalStockRolls > 0 ? `+ ${totalStockRolls} ரோல்` : ''}</strong> | மொத்த எடை: <strong style={{ color: 'var(--text-main)' }}>{totalStockWeight.toFixed(3)}g</strong>
+          </p>
         </div>
       </div>
 
-      {/* Filter bar */}
-      <div className="card mb-16" style={{ padding: '14px 18px' }}>
-        <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '200px', position: 'relative' }}>
+      {/* Filter and Search Bar */}
+      <div className="card mb-16" style={{ padding: '14px 16px' }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
             <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
             <input
               type="text"
-              placeholder="தேடுக... (Search item, category...)"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{ paddingLeft: '38px', height: '40px' }}
+              placeholder="தேடுக (பொருள், வகை, விபரம்)..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{ paddingLeft: 36, height: 38, fontSize: '13px' }}
             />
           </div>
-          <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} style={{ width: '200px', height: '40px' }}>
-            <option value="">அனைத்து பிரிவுகள் (All Categories)</option>
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+
+          <div style={{ minWidth: '140px' }}>
+            <select
+              value={selectedCategory}
+              onChange={e => setSelectedCategory(e.target.value)}
+              style={{ height: 38, fontSize: '13px' }}
+            >
+              {categories.map(c => (
+                <option key={c} value={c}>{c === 'All' ? 'அனைத்துப் பிரிவுகள்' : c}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Desktop View Table (hidden on mobile) */}
-      <div className="desktop-table-view card" style={{ padding: 0, overflow: 'hidden' }}>
+      {/* Desktop Table View */}
+      <div className="card desktop-table-view" style={{ padding: '0', overflow: 'hidden' }}>
         <div className="table-wrap">
           <table style={{ minWidth: '600px' }}>
             <thead>
@@ -54,7 +74,7 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
                 <th style={{ minWidth: '160px', textAlign: 'left' }}>பொருள் (Variant)</th>
                 <th style={{ minWidth: '100px', textAlign: 'left' }}>பிரிவு</th>
                 <th style={{ minWidth: '100px', textAlign: 'left' }}>உட்பிரிவு</th>
-                <th style={{ minWidth: '90px', textAlign: 'center' }}>எண்ணிக்கை</th>
+                <th style={{ minWidth: '90px', textAlign: 'center' }}>அளவு</th>
                 <th style={{ minWidth: '110px', textAlign: 'right' }}>மொத்த எடை (Total Wt)</th>
                 {role === 'admin' && <th style={{ width: '50px', textAlign: 'center' }}></th>}
               </tr>
@@ -63,6 +83,7 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
               {filtered.map((p, idx) => {
                 const totalWt = p.weight || 0
                 const qty = p.quantity || 0
+                const isKodi = p.category === 'கொடி'
 
                 return (
                   <tr key={p.id || idx}>
@@ -73,9 +94,11 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
                     </td>
                     <td><span className="badge badge-blue">{p.category}</span></td>
                     <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.subcategory || '-'}</td>
-                    <td style={{ textAlign: 'center' }}><span className="text-gold fw-600">{qty} pcs</span></td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span className="text-gold fw-600">{isKodi ? '1 ரோல்' : `${qty} pcs`}</span>
+                    </td>
                     <td style={{ textAlign: 'right' }} className="fw-700 text-gold">
-                      {totalWt > 0 ? `${totalWt.toFixed(2)}g` : '-'}
+                      {totalWt > 0 ? `${totalWt.toFixed(3)}g` : '-'}
                     </td>
                     {role === 'admin' && (
                       <td style={{ textAlign: 'center' }}>
@@ -100,11 +123,12 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
         </div>
       </div>
 
-      {/* Mobile View Cards (100% Full Width, ZERO Sideways Scroll) */}
+      {/* Mobile View Cards */}
       <div className="mobile-card-list">
         {filtered.map((p, idx) => {
           const totalWt = p.weight || 0
           const qty = p.quantity || 0
+          const isKodi = p.category === 'கொடி'
 
           return (
             <div key={p.id || idx} className="mobile-item-card">
@@ -124,45 +148,34 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
                 {role === 'admin' && (
                   <button
                     className="btn btn-danger-ghost"
-                    onClick={() => {
-                      if (confirm(`"${p.variant}" இருப்பை நீக்க விரும்புகிறீர்களா?`)) {
-                        onDelete && onDelete(p.id)
-                      }
-                    }}
-                    title="நீக்கு (Delete)"
-                    style={{ padding: '6px 8px', height: '32px' }}
+                    onClick={() => onDelete && onDelete(p.id)}
+                    title="நீக்கு"
+                    style={{ padding: '4px 8px', height: '28px' }}
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                   </button>
                 )}
               </div>
 
-              {/* 2 Metric Box */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 8,
-                background: 'rgba(26, 61, 99, 0.06)',
-                border: '1px solid rgba(26, 61, 99, 0.10)',
-                borderRadius: 10,
-                padding: '8px 12px',
-                textAlign: 'center'
-              }}>
+              {/* 2-Metric Highlight */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, background: 'rgba(26, 61, 99, 0.05)', padding: '8px 10px', borderRadius: 8 }}>
                 <div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>மொத்த அளவு</div>
-                  <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-main)' }}>{qty} pcs</div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--text-sub)' }}>அளவு (Stock Format)</div>
+                  <div className="fw-700" style={{ fontSize: '13px', color: 'var(--text-main)' }}>{isKodi ? '🌀 1 ரோல்' : `${qty} pcs`}</div>
                 </div>
-                <div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>மொத்த எடை</div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#1A3D63' }}>{totalWt > 0 ? `${totalWt.toFixed(2)}g` : '-'}</div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '10.5px', color: 'var(--text-sub)' }}>மொத்த எடை (Weight)</div>
+                  <div className="fw-700 text-gold" style={{ fontSize: '13px' }}>{totalWt > 0 ? `${totalWt.toFixed(3)}g` : '-'}</div>
                 </div>
               </div>
             </div>
           )
         })}
+
         {filtered.length === 0 && (
-          <div className="card" style={{ textAlign: 'center', padding: 30, color: 'var(--text-sub)' }}>
-            பொருட்கள் எதுவும் இல்லை
+          <div className="card" style={{ textAlign: 'center', padding: 36, color: 'var(--text-sub)' }}>
+            <Package size={28} opacity={0.3} style={{ margin: '0 auto 8px' }} />
+            <div>பொருட்கள் எதுவும் இல்லை</div>
           </div>
         )}
       </div>

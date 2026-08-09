@@ -23,6 +23,7 @@ const SellDashboard = ({ products = [], processSale }) => {
   const [error, setError]               = useState('')
 
   const selectedProd = products.find(p => String(p.id) === String(selectedProductId))
+  const isKodi = selectedProd?.category === 'கொடி'
 
   const existingCartQty = selectedProd
     ? cart.filter(i => String(i.productId) === String(selectedProd.id)).reduce((s, i) => s + (i.quantity || 0), 0)
@@ -38,7 +39,7 @@ const SellDashboard = ({ products = [], processSale }) => {
   const parsedQty = parseInt(sellQty) || 0
   const parsedWeight = parseFloat(sellWeight) || 0
 
-  const isQtyOver = selectedProd && parsedQty > availQty
+  const isQtyOver = !isKodi && selectedProd && parsedQty > availQty
   const isWeightOver = selectedProd && parsedWeight > (availWeight + 0.0001)
 
   const handleProductChange = (prodId) => {
@@ -60,23 +61,23 @@ const SellDashboard = ({ products = [], processSale }) => {
 
     if (!selectedProd) return
 
-    const qty = parseInt(sellQty) || 1
+    const qty = isKodi ? 1 : (parseInt(sellQty) || 1)
     const weightVal = parseFloat(sellWeight) || 0
     const gross = parseFloat(grossAmount) || 0
     const disc = parseFloat(discount) || 0
 
-    if (qty <= 0) {
+    if (!isKodi && qty <= 0) {
       setError('தயவுசெய்து சரியான எண்ணிக்கையை உள்ளிடவும் (Enter valid quantity)')
       return
     }
 
-    if (qty > availQty) {
+    if (!isKodi && qty > availQty) {
       setError(`இருப்பில் போதுமான எண்ணிக்கை இல்லை! (இருப்பில்: ${availQty} pcs மட்டுமே)`)
       return
     }
 
     if (weightVal <= 0) {
-      setError('தயவுசெய்து விற்பனை எடையை (Sale Weight in g) உள்ளிடவும்')
+      setError('தயவுசெய்து விற்பனை எடையை (Sale / Cut Weight in g) உள்ளிடவும்')
       return
     }
 
@@ -95,6 +96,7 @@ const SellDashboard = ({ products = [], processSale }) => {
       subcategory: selectedProd.subcategory,
       variant: selectedProd.variant,
       detail: selectedProd.detail,
+      isKodi: isKodi,
       unitWeight: weightVal / Math.max(1, qty),
       totalWeight: weightVal,
       quantity: qty,
@@ -141,7 +143,7 @@ const SellDashboard = ({ products = [], processSale }) => {
 
   const cartTotal = cart.reduce((s, i) => s + (i.total || 0), 0)
   const cartTotalWeight = cart.reduce((s, i) => s + (i.totalWeight || 0), 0)
-  const cartTotalQty = cart.reduce((s, i) => s + (i.quantity || 0), 0)
+  const cartTotalQty = cart.filter(i => !i.isKodi).reduce((s, i) => s + (i.quantity || 0), 0)
   const grandTotal = Math.max(0, cartTotal - (parseFloat(oldGoldAmount) || 0) - (parseFloat(oldSilverAmount) || 0))
 
   return (
@@ -270,8 +272,8 @@ const SellDashboard = ({ products = [], processSale }) => {
             <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
               <span>இருப்பில் உள்ள பொருள் (Select Product) *</span>
               {selectedProd && (
-                <span style={{ fontSize: 11, fontWeight: 700, color: (availWeight <= 0 || availQty <= 0) ? '#EF4444' : '#10B981' }}>
-                  இருப்பு: {availQty} pcs | {availWeight.toFixed(3)}g
+                <span style={{ fontSize: 11, fontWeight: 700, color: (availWeight <= 0) ? '#EF4444' : '#10B981' }}>
+                  {isKodi ? `இருப்பு ரோல் எடை: ${availWeight.toFixed(3)}g` : `இருப்பு: ${availQty} pcs | ${availWeight.toFixed(3)}g`}
                 </span>
               )}
             </label>
@@ -280,14 +282,15 @@ const SellDashboard = ({ products = [], processSale }) => {
               onChange={e => handleProductChange(e.target.value)}
             >
               <option value="">— பொருளைத் தேர்ந்தெடுக்கவும் —</option>
-              {products.filter(p => p.quantity > 0).map(p => {
+              {products.filter(p => (p.weight || 0) > 0 || (p.quantity || 0) > 0).map(p => {
                 const itemInCartWt = cart.filter(i => String(i.productId) === String(p.id)).reduce((s, i) => s + (i.totalWeight || 0), 0)
                 const itemInCartQty = cart.filter(i => String(i.productId) === String(p.id)).reduce((s, i) => s + (i.quantity || 0), 0)
                 const remQty = Math.max(0, p.quantity - itemInCartQty)
                 const remWt = Math.max(0, (p.weight || 0) - itemInCartWt)
+                const isK = p.category === 'கொடி'
                 return (
-                  <option key={p.id} value={p.id} disabled={remQty <= 0 || remWt <= 0}>
-                    {p.variant} ({p.category}) — இருப்பு: {remQty} pcs | {remWt.toFixed(2)}g
+                  <option key={p.id} value={p.id} disabled={remWt <= 0}>
+                    {p.variant} ({p.category}) — {isK ? `ரோல் இருப்பு: ${remWt.toFixed(2)}g` : `இருப்பு: ${remQty} pcs | ${remWt.toFixed(2)}g`}
                   </option>
                 )
               })}
@@ -295,20 +298,33 @@ const SellDashboard = ({ products = [], processSale }) => {
           </div>
 
           <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
-            <div className="form-group">
-              <label>எண்ணிக்கை (Sale Qty pcs) *</label>
-              <input
-                type="number"
-                value={sellQty}
-                onChange={e => handleQtyChange(e.target.value)}
-                min="1"
-                max={availQty || 1}
-                style={{ borderColor: isQtyOver ? '#EF4444' : undefined }}
-              />
-            </div>
+            {isKodi ? (
+              <div className="form-group">
+                <label>விற்பனை முறை (Cut Format)</label>
+                <input
+                  type="text"
+                  value="🌀 கொடி ரோல் கட் (Cut from Roll by Weight)"
+                  disabled
+                  style={{ background: 'rgba(200, 169, 106, 0.08)', color: 'var(--gold)', fontWeight: 700 }}
+                />
+              </div>
+            ) : (
+              <div className="form-group">
+                <label>எண்ணிக்கை (Sale Qty pcs) *</label>
+                <input
+                  type="number"
+                  value={sellQty}
+                  onChange={e => handleQtyChange(e.target.value)}
+                  min="1"
+                  max={availQty || 1}
+                  style={{ borderColor: isQtyOver ? '#EF4444' : undefined }}
+                />
+              </div>
+            )}
+
             <div className="form-group">
               <label style={{ color: isWeightOver ? '#EF4444' : undefined }}>
-                விற்பனை எடை (Sale Weight in g) *
+                {isKodi ? 'கட் செய்து தரும் எடை (Cut Weight in g) *' : 'விற்பனை எடை (Sale Weight in g) *'}
               </label>
               <input
                 type="number"
@@ -365,7 +381,7 @@ const SellDashboard = ({ products = [], processSale }) => {
                 <thead>
                   <tr>
                     <th style={{ textAlign: 'left', width: '38%' }}>பொருள்</th>
-                    <th style={{ textAlign: 'center', width: '14%' }}>QTY</th>
+                    <th style={{ textAlign: 'center', width: '14%' }}>அளவு</th>
                     <th style={{ textAlign: 'right', width: '22%' }}>எடை</th>
                     <th style={{ textAlign: 'right', width: '26%' }}>தொகை (₹)</th>
                     <th style={{ width: '30px' }}></th>
@@ -378,7 +394,9 @@ const SellDashboard = ({ products = [], processSale }) => {
                         <div className="fw-600" style={{ color: 'var(--text-main)', fontSize: '13px' }}>{item.variant}</div>
                         <div style={{ fontSize: '11px', color: 'var(--text-sub)' }}>{item.category}</div>
                       </td>
-                      <td style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantity}</td>
+                      <td style={{ textAlign: 'center', fontWeight: 600 }}>
+                        {item.isKodi ? <span className="badge badge-blue" style={{ fontSize: '10px' }}>ரோல் கட்</span> : item.quantity}
+                      </td>
                       <td style={{ textAlign: 'right', fontWeight: 600 }}>{item.totalWeight?.toFixed(3)}g</td>
                       <td style={{ textAlign: 'right' }} className="fw-700 text-gold">
                         ₹{item.total.toLocaleString('en-IN')}
@@ -408,10 +426,12 @@ const SellDashboard = ({ products = [], processSale }) => {
 
           {/* Cart Calculations Summary Box */}
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 4 }}>
-              <span>மொத்த எண்ணிக்கை (Total Qty):</span>
-              <span className="fw-600" style={{ color: 'var(--text-main)' }}>{cartTotalQty} pcs</span>
-            </div>
+            {cartTotalQty > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 4 }}>
+                <span>மொத்த எண்ணிக்கை (Total Qty):</span>
+                <span className="fw-600" style={{ color: 'var(--text-main)' }}>{cartTotalQty} pcs</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 5 }}>
               <span>மொத்த விற்பனை எடை (Total Weight):</span>
               <span className="fw-600" style={{ color: 'var(--text-main)' }}>{cartTotalWeight.toFixed(3)} g</span>
