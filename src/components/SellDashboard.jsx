@@ -50,7 +50,6 @@ const SellDashboard = ({ products = [], processSale }) => {
   const handleQtyChange = (qtyVal) => {
     setSellQty(qtyVal)
     setError('')
-    // Strictly manual typing, no automatic filling!
   }
 
   const addToCart = () => {
@@ -149,7 +148,7 @@ const SellDashboard = ({ products = [], processSale }) => {
     <div className="animate-fade-in" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div className="flex-between mb-16">
         <div>
-          <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
             விற்பனை &amp; பில்லிங் (Sales &amp; POS)
           </h2>
           <p className="text-sub">Wholesale Billing, Metal Deductions &amp; Real-time Stock Deduction</p>
@@ -157,21 +156,21 @@ const SellDashboard = ({ products = [], processSale }) => {
       </div>
 
       {error && (
-        <div className="toast-error mb-14" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'rgba(239,68,68,0.12)', color: '#EF4444', border: '1px solid #EF4444', borderRadius: 10 }}>
+        <div className="toast-error mb-14" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(239,68,68,0.12)', color: '#EF4444', border: '1px solid #EF4444', borderRadius: 10 }}>
           <AlertTriangle size={18} />
           <span style={{ fontSize: '13px', fontWeight: 600 }}>{error}</span>
         </div>
       )}
 
-      <div className="layout-split-grid" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '20px', alignItems: 'start' }}>
+      <div className="layout-split-grid">
         {/* Left Card: Customer, Metal Rates & Product Addition */}
-        <div className="card" style={{ padding: '20px 22px' }}>
+        <div className="card" style={{ padding: '18px 20px', width: '100%', boxSizing: 'border-box' }}>
           
           {/* Section 1: Customer Details */}
-          <div className="card-title" style={{ fontSize: '15px', marginBottom: 14 }}>
+          <div className="card-title" style={{ fontSize: '14.5px', marginBottom: 12 }}>
             1. வாடிக்கையாளர் விபரம் (Customer Details)
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 14 }}>
             <div className="form-group">
               <label>வாடிக்கையாளர் பெயர் (Customer Name)</label>
               <input
@@ -193,11 +192,11 @@ const SellDashboard = ({ products = [], processSale }) => {
           </div>
 
           {/* Section 2: Today's Rates & Old Metals */}
-          <div className="card-title" style={{ fontSize: '15px', marginBottom: 14, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
+          <div className="card-title" style={{ fontSize: '14.5px', marginBottom: 12, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
             2. இன்றைய விலை &amp; பழைய நகை கழிவு (Rates &amp; Deductions)
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
             <div className="form-group">
               <label>இன்றைய தங்கம் விலை (Gold Rate ₹/g)</label>
               <input
@@ -218,7 +217,7 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
             <div className="form-group">
               <label>பழைய தங்கம் எடை (Old Gold Wt g)</label>
               <input
@@ -240,7 +239,7 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 14 }}>
             <div className="form-group">
               <label>பழைய வெள்ளி எடை (Old Silver Wt g)</label>
               <input
@@ -263,15 +262,15 @@ const SellDashboard = ({ products = [], processSale }) => {
           </div>
 
           {/* Section 3: Product Selection & Manual Weight Entry */}
-          <div className="card-title" style={{ fontSize: '15px', marginBottom: 14, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
+          <div className="card-title" style={{ fontSize: '14.5px', marginBottom: 12, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
             3. பொருள் சேர்த்தல் (Add Product to Bill)
           </div>
 
-          <div className="form-group" style={{ marginBottom: 14 }}>
-            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="form-group" style={{ marginBottom: 12 }}>
+            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
               <span>இருப்பில் உள்ள பொருள் (Select Product) *</span>
               {selectedProd && (
-                <span style={{ fontSize: 11.5, fontWeight: 700, color: (availWeight <= 0 || availQty <= 0) ? '#EF4444' : '#10B981' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: (availWeight <= 0 || availQty <= 0) ? '#EF4444' : '#10B981' }}>
                   இருப்பு: {availQty} pcs | {availWeight.toFixed(3)}g
                 </span>
               )}
@@ -295,7 +294,7 @@ const SellDashboard = ({ products = [], processSale }) => {
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
             <div className="form-group">
               <label>எண்ணிக்கை (Sale Qty pcs) *</label>
               <input
@@ -322,7 +321,7 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 14 }}>
             <div className="form-group">
               <label>மொத்த விலை (Gross Amount ₹) *</label>
               <input
@@ -347,22 +346,22 @@ const SellDashboard = ({ products = [], processSale }) => {
             className="btn btn-gold btn-full btn-lg"
             onClick={addToCart}
             disabled={isWeightOver || isQtyOver}
-            style={{ height: '46px', fontSize: '14.5px', fontWeight: 700, opacity: (isWeightOver || isQtyOver) ? 0.6 : 1, cursor: (isWeightOver || isQtyOver) ? 'not-allowed' : 'pointer' }}
+            style={{ height: '44px', fontSize: '14.5px', fontWeight: 700, opacity: (isWeightOver || isQtyOver) ? 0.6 : 1, cursor: (isWeightOver || isQtyOver) ? 'not-allowed' : 'pointer' }}
           >
             <Plus size={18} /> + பட்டியலில் சேர் (Add Item to Bill)
           </button>
         </div>
 
         {/* Right Card: Cart Summary & Checkout */}
-        <div className="card" style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '520px' }}>
+        <div className="card" style={{ padding: '18px 20px', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <div className="card-title" style={{ fontSize: '15px', marginBottom: 14 }}>
+            <div className="card-title" style={{ fontSize: '14.5px', marginBottom: 12 }}>
               4. விற்பனைப் பட்டியல் (Cart &amp; Billing Items)
             </div>
 
             {/* Desktop Table for Cart */}
-            <div className="table-wrap" style={{ maxHeight: '280px', overflowY: 'auto', marginBottom: 16 }}>
-              <table style={{ width: '100%', minWidth: '380px' }}>
+            <div className="table-wrap" style={{ maxHeight: '280px', overflowY: 'auto', marginBottom: 14 }}>
+              <table style={{ width: '100%', minWidth: '360px' }}>
                 <thead>
                   <tr>
                     <th style={{ textAlign: 'left', width: '38%' }}>பொருள்</th>
@@ -408,29 +407,29 @@ const SellDashboard = ({ products = [], processSale }) => {
           </div>
 
           {/* Cart Calculations Summary Box */}
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 5 }}>
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 4 }}>
               <span>மொத்த எண்ணிக்கை (Total Qty):</span>
               <span className="fw-600" style={{ color: 'var(--text-main)' }}>{cartTotalQty} pcs</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 5 }}>
               <span>மொத்த விற்பனை எடை (Total Weight):</span>
               <span className="fw-600" style={{ color: 'var(--text-main)' }}>{cartTotalWeight.toFixed(3)} g</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-sub)', marginBottom: 5 }}>
               <span>பொருட்கள் மொத்தம் (Gross Total):</span>
               <span className="fw-600" style={{ color: 'var(--text-main)' }}>₹{cartTotal.toLocaleString('en-IN')}</span>
             </div>
 
             {(parseFloat(oldGoldAmount) || 0) > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#EF4444', marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#EF4444', marginBottom: 5 }}>
                 <span>பழைய தங்கம் கழிப்பு (Old Gold {oldGoldWeight ? `[${oldGoldWeight}g]` : ''}):</span>
                 <span className="fw-700">-₹{parseFloat(oldGoldAmount).toLocaleString('en-IN')}</span>
               </div>
             )}
 
             {(parseFloat(oldSilverAmount) || 0) > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#EF4444', marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#EF4444', marginBottom: 5 }}>
                 <span>பழைய வெள்ளி கழிப்பு (Old Silver {oldSilverWeight ? `[${oldSilverWeight}g]` : ''}):</span>
                 <span className="fw-700">-₹{parseFloat(oldSilverAmount).toLocaleString('en-IN')}</span>
               </div>
@@ -443,15 +442,15 @@ const SellDashboard = ({ products = [], processSale }) => {
               background: 'rgba(200, 169, 106, 0.12)',
               border: '1.5px solid var(--gold)',
               borderRadius: 10,
-              padding: '12px 14px',
-              marginTop: 10,
-              marginBottom: 14
+              padding: '10px 12px',
+              marginTop: 8,
+              marginBottom: 12
             }}>
               <div>
-                <div style={{ fontSize: '11px', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>நிகர பில் தொகை</div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>NET GRAND TOTAL</div>
+                <div style={{ fontSize: '10.5px', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>நிகர பில் தொகை</div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-main)' }}>NET GRAND TOTAL</div>
               </div>
-              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
                 ₹{grandTotal.toLocaleString('en-IN')}
               </div>
             </div>
@@ -460,7 +459,7 @@ const SellDashboard = ({ products = [], processSale }) => {
               className="btn btn-gold btn-full btn-lg"
               disabled={cart.length === 0 || loading}
               onClick={handleCheckout}
-              style={{ height: '48px', fontSize: '15px', fontWeight: 800 }}
+              style={{ height: '46px', fontSize: '14.5px', fontWeight: 800 }}
             >
               <Printer size={18} /> {loading ? 'செயலாக்கப்படுகிறது...' : 'விற்பனை முடி & பில் அச்சடி (Complete & Print Bill)'}
             </button>

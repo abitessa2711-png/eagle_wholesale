@@ -94,10 +94,10 @@ const AddStock = ({ onAddProduct }) => {
   const availableDetails = getDetails()
 
   return (
-    <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div className="flex-between mb-14">
+    <div className="animate-fade-in" style={{ width: '100%', maxWidth: '800px', margin: '0 auto', boxSizing: 'border-box' }}>
+      <div className="flex-between mb-16">
         <div>
-          <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
             சரக்கு சேர்த்தல் (Add Stock)
           </h2>
           <p className="text-sub">Add new inventory items across all categories and subcategories</p>
@@ -106,18 +106,20 @@ const AddStock = ({ onAddProduct }) => {
 
       {/* Prominent Success Notification Banner */}
       {successMsg && (
-        <div className="toast-success mb-14" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'rgba(16,185,129,0.15)', color: '#10B981', border: '1px solid #10B981', borderRadius: 10 }}>
-          <CheckCircle2 size={20} />
-          <span>{successMsg}</span>
+        <div className="toast-success mb-14" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(16,185,129,0.15)', color: '#10B981', border: '1px solid #10B981', borderRadius: 10 }}>
+          <CheckCircle2 size={18} />
+          <span style={{ fontSize: '13px' }}>{successMsg}</span>
         </div>
       )}
 
-      <div className="card" style={{ padding: '20px 24px' }}>
-        <div className="card-title">பொருள் விவரங்கள் (Product Entry Form)</div>
+      <div className="card" style={{ padding: '18px 20px', width: '100%', boxSizing: 'border-box' }}>
+        <div className="card-title" style={{ fontSize: '14.5px', marginBottom: 12 }}>
+          பொருள் விவரங்கள் (Product Entry Form)
+        </div>
 
         <form onSubmit={handleSubmit}>
           {/* Row 1: Category & Subcategory */}
-          <div className="form-grid" style={{ marginBottom: 14 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
             <div className="form-group">
               <label>1. முக்கியப் பிரிவு (Main Category) *</label>
               <select 
@@ -125,7 +127,7 @@ const AddStock = ({ onAddProduct }) => {
                 onChange={e => setFormData({ ...formData, category: e.target.value, subcategory: '', variant: '', detail: '', weight: '' })} 
                 required
               >
-                <option value="">— பிரிவு தேர்வு செய்க (Select Category) —</option>
+                <option value="">— பிரிவு தேர்வு செய்க —</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
@@ -139,9 +141,9 @@ const AddStock = ({ onAddProduct }) => {
                   disabled={!formData.category}
                   required
                 >
-                  <option value="">— துணைப்பிரிவு (Select Subcategory) —</option>
+                  <option value="">— துணைப்பிரிவு —</option>
                   {availableSubs.map(s => <option key={s} value={s}>{s}</option>)}
-                  <option value="__other__">+ புதிய துணைப்பிரிவு (Custom / Other)...</option>
+                  <option value="__other__">+ புதிய துணைப்பிரிவு (Custom)...</option>
                 </select>
               ) : (
                 <input
@@ -160,7 +162,7 @@ const AddStock = ({ onAddProduct }) => {
           </div>
 
           {formData.subcategory === '__other__' && (
-            <div className="form-group" style={{ marginBottom: 14 }}>
+            <div className="form-group" style={{ marginBottom: 12 }}>
               <label>புதிய துணைப்பிரிவு பெயர் (Custom Subcategory Name) *</label>
               <input
                 type="text"
@@ -173,9 +175,9 @@ const AddStock = ({ onAddProduct }) => {
           )}
 
           {/* Row 2: Variant & Detail */}
-          <div className="form-grid" style={{ marginBottom: 14 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
             <div className="form-group">
-              <label>3. மாடல் / அளவு / பொருள் பெயர் (Variant / Size) *</label>
+              <label>3. மாடல் / அளவு (Variant / Size) *</label>
               {availableVariants.length > 0 ? (
                 <select 
                   value={formData.variant} 
@@ -183,9 +185,9 @@ const AddStock = ({ onAddProduct }) => {
                   disabled={!formData.subcategory}
                   required
                 >
-                  <option value="">— மாடல் / அளவு தேர்வு செய்க (Select Variant) —</option>
+                  <option value="">— மாடல் / அளவு —</option>
                   {availableVariants.map(v => <option key={v} value={v}>{v}</option>)}
-                  <option value="__other__">+ புதிய மாடல் பெயர் (Custom / Other)...</option>
+                  <option value="__other__">+ புதிய மாடல் (Custom)...</option>
                 </select>
               ) : (
                 <input
@@ -209,7 +211,7 @@ const AddStock = ({ onAddProduct }) => {
                   value={formData.detail} 
                   onChange={e => setFormData({ ...formData, detail: e.target.value })}
                 >
-                  <option value="">— முத்து / விவரம் தேர்வு செய்க (Select Detail) —</option>
+                  <option value="">— முத்து / விவரம் —</option>
                   {availableDetails.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               ) : (
@@ -224,7 +226,7 @@ const AddStock = ({ onAddProduct }) => {
           </div>
 
           {formData.variant === '__other__' && (
-            <div className="form-group" style={{ marginBottom: 14 }}>
+            <div className="form-group" style={{ marginBottom: 12 }}>
               <label>புதிய மாடல் பெயர் (Custom Variant Name) *</label>
               <input
                 type="text"
@@ -237,7 +239,7 @@ const AddStock = ({ onAddProduct }) => {
           )}
 
           {/* Row 3: Quantity & Total Weight */}
-          <div className="form-grid" style={{ marginBottom: 14 }}>
+          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
             <div className="form-group">
               <label>5. மொத்த எண்ணிக்கை (Total Quantity in pcs) *</label>
               <input 
@@ -265,7 +267,7 @@ const AddStock = ({ onAddProduct }) => {
           </div>
 
           {/* Row 4: Date & Time */}
-          <div className="form-group" style={{ marginBottom: 20 }}>
+          <div className="form-group" style={{ marginBottom: 16 }}>
             <label>7. சேர்க்கை தேதி & நேரம் (Stock Date & Time) *</label>
             <input 
               type="datetime-local" 
@@ -276,15 +278,15 @@ const AddStock = ({ onAddProduct }) => {
           </div>
 
           <div>
-            <button type="submit" className="btn btn-gold btn-full btn-lg" disabled={loading} style={{ height: '48px', fontSize: '15px', fontWeight: 800 }}>
+            <button type="submit" className="btn btn-gold btn-full btn-lg" disabled={loading} style={{ height: '44px', fontSize: '14.5px', fontWeight: 800 }}>
               <Plus size={18} /> {loading ? 'சேமிக்கப்படுகிறது...' : '+ சரக்கு இருப்பில் சேர் (Add Stock to Inventory)'}
             </button>
           </div>
         </form>
       </div>
       
-      <div style={{ marginTop: 14, background: 'rgba(229,184,105,0.06)', border: '1px dashed var(--gold)', padding: '12px 16px', borderRadius: 12 }}>
-        <p style={{ fontSize: '12px', color: 'var(--text-sub)', textAlign: 'center', margin: 0, lineHeight: 1.4 }}>
+      <div style={{ marginTop: 12, background: 'rgba(229,184,105,0.06)', border: '1px dashed var(--gold)', padding: '10px 14px', borderRadius: 10 }}>
+        <p style={{ fontSize: '11.5px', color: 'var(--text-sub)', textAlign: 'center', margin: 0, lineHeight: 1.4 }}>
           💡 <strong>ஹோல்சேல் முறை:</strong> இங்கு உள்ளிடும் எடை என்பது மொத்த எண்ணிக்கைக்கான மொத்த எடை (Total Batch Weight) ஆகும். (உதாரணம்: 20 கொலுசுக்கு மொத்த எடை 600g).
         </p>
       </div>

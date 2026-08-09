@@ -567,12 +567,14 @@ select option { background: #FFFFFF; color: #0A1931; }
 /* ─── DESKTOP TABLE VS MOBILE CARD TOGGLES ─────────────────── */
 .desktop-table-view {
   display: block;
+  width: 100%;
 }
 
 .mobile-card-list {
   display: none;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
 }
 
 .mobile-item-card {
@@ -581,6 +583,32 @@ select option { background: #FFFFFF; color: #0A1931; }
   border-radius: 14px;
   padding: 14px 16px;
   box-shadow: 0 4px 16px rgba(10, 25, 49, 0.03);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.layout-split-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.responsive-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .menu-toggle-btn {
@@ -599,6 +627,24 @@ select option { background: #FFFFFF; color: #0A1931; }
 
   .mobile-card-list {
     display: flex !important;
+  }
+
+  .layout-split-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  .responsive-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .responsive-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
   }
 }
 
