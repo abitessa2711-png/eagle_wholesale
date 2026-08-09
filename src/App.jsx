@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Login          from './components/Login'
 import Signup         from './components/Signup'
 import Sidebar        from './components/Sidebar'
@@ -10,8 +10,7 @@ import SoldItems      from './components/SoldItems'
 import StockDashboard from './components/StockDashboard'
 import OldBuyback     from './components/OldBuyback'
 import ServiceLog     from './components/ServiceLog'
-import { INITIAL_PRODUCTS, INITIAL_SALES, INITIAL_BUYBACKS, INITIAL_LEDGER } from './data/initialData'
-import { supabase, fetchSupabaseData, insertSupabaseRecord, deleteSupabaseRecord, clearSupabaseTable } from './supabaseClient'
+import { supabase, fetchSupabaseData, insertSupabaseRecord, updateSupabaseRecord, deleteSupabaseRecord, clearSupabaseTable } from './supabaseClient'
 
 export default function App() {
   // ── Auth (Requires Login by default) ───────────────────────────────────────
@@ -20,10 +19,10 @@ export default function App() {
   const [activeTab, setActiveTab]       = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  // ── Client Production State (100% Clean Fresh Launch) ──────────────────────
+  // ── State ──────────────────────────────────────────────────────────────────
   const [products, setProducts]   = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_production_store_v1_products')
+      const saved = localStorage.getItem('eagle_wholesale_live_v2_products')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -32,7 +31,7 @@ export default function App() {
 
   const [soldItems, setSoldItems] = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_production_store_v1_sales')
+      const saved = localStorage.getItem('eagle_wholesale_live_v2_sales')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -41,7 +40,7 @@ export default function App() {
 
   const [buybacks, setBuybacks]   = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_production_store_v1_buybacks')
+      const saved = localStorage.getItem('eagle_wholesale_live_v2_buybacks')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -50,55 +49,87 @@ export default function App() {
 
   const [serviceEntries, setServiceEntries] = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_production_store_v1_services')
+      const saved = localStorage.getItem('eagle_wholesale_live_v2_services')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
     }
   })
 
-  // Save changes locally
-  useEffect(() => {
-    localStorage.setItem('eagle_wholesale_production_store_v1_products', JSON.stringify(products))
-  }, [products])
+  // ── 100% Real-Time Cloud Synchronization (Phone & Laptop Simultaneous Sync) ──
+  const syncFromCloud = useCallback(async () => {
+    try {
+      const [dbProducts, dbSales, dbBuybacks, dbServices] = await Promise.all([
+        fetchSupabaseData('products'),
+        fetchSupabaseData('sales'),
+        fetchSupabaseData('buybacks'),
+        fetchSupabaseData('services')
+      ])
+
+      if (dbProducts !== null) {
+        setProducts(dbProducts)
+        localStorage.setItem('eagle_wholesale_live_v2_products', JSON.stringify(dbProducts))
+      }
+      if (dbSales !== null) {
+        setSoldItems(dbSales)
+        localStorage.setItem('eagle_wholesale_live_v2_sales', JSON.stringify(dbSales))
+      }
+      if (dbBuybacks !== null) {
+        setBuybacks(dbBuybacks)
+        localStorage.setItem('eagle_wholesale_live_v2_buybacks', JSON.stringify(dbBuybacks))
+      }
+      if (dbServices !== null) {
+        setServiceEntries(dbServices)
+        localStorage.setItem('eagle_wholesale_live_v2_services', JSON.stringify(dbServices))
+      }
+    } catch (err) {
+      console.warn('Realtime cloud sync error:', err)
+    }
+  }, [])
 
   useEffect(() => {
-    localStorage.setItem('eagle_wholesale_production_store_v1_sales', JSON.stringify(soldItems))
-  }, [soldItems])
+    // Initial fetch on mount
+    syncFromCloud()
 
-  useEffect(() => {
-    localStorage.setItem('eagle_wholesale_production_store_v1_buybacks', JSON.stringify(buybacks))
-  }, [buybacks])
+    // Real-time synchronization polling every 2 seconds across all devices
+    const interval = setInterval(syncFromCloud, 2000)
 
-  useEffect(() => {
-    localStorage.setItem('eagle_wholesale_production_store_v1_services', JSON.stringify(serviceEntries))
-  }, [serviceEntries])
+    // Synchronize immediately when window gains focus or app is opened on phone
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        syncFromCloud()
+      }
+    }
+
+    window.addEventListener('focus', syncFromCloud)
+    window.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', syncFromCloud)
+      window.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [syncFromCloud])
 
   const handleLogout = () => {
     setUser(null)
   }
 
   const handleResetAllData = async () => {
-    if (confirm('அனைத்து டெமோ/டெஸ்ட் பதிவுகளையும் நீக்கி கிளைண்டிற்குத் தூய்மையான தொடக்கத்திற்கு மாற்ற விரும்புகிறீர்களா? (Clear all data for clean client launch?)')) {
+    if (confirm('அனைத்து டெமோ/டெஸ்ட் பதிவுகளையும் நீக்கி புதிய நிலைக்கு ரீசெட் செய்ய விரும்புகிறீர்களா? (Clear all data for clean client launch?)')) {
       // Clear localStorage
-      localStorage.removeItem('eagle_wholesale_production_store_v1_products')
-      localStorage.removeItem('eagle_wholesale_production_store_v1_sales')
-      localStorage.removeItem('eagle_wholesale_production_store_v1_buybacks')
-      localStorage.removeItem('eagle_wholesale_production_store_v1_services')
-      localStorage.removeItem('eagle_wholesale_client_v1_products')
-      localStorage.removeItem('eagle_wholesale_client_v1_sales')
-      localStorage.removeItem('eagle_wholesale_client_v1_buybacks')
-      localStorage.removeItem('eagle_wholesale_client_v1_services')
-      localStorage.removeItem('eagle_products_v3')
-      localStorage.removeItem('eagle_sales_v3')
-      localStorage.removeItem('eagle_buybacks_v3')
-      localStorage.removeItem('eagle_services_v3')
+      localStorage.removeItem('eagle_wholesale_live_v2_products')
+      localStorage.removeItem('eagle_wholesale_live_v2_sales')
+      localStorage.removeItem('eagle_wholesale_live_v2_buybacks')
+      localStorage.removeItem('eagle_wholesale_live_v2_services')
 
-      // Clear Remote Tables
-      await clearSupabaseTable('products')
-      await clearSupabaseTable('sales')
-      await clearSupabaseTable('buybacks')
-      await clearSupabaseTable('services')
+      // Clear Cloud Tables
+      await Promise.all([
+        clearSupabaseTable('products'),
+        clearSupabaseTable('sales'),
+        clearSupabaseTable('buybacks'),
+        clearSupabaseTable('services')
+      ])
 
       setProducts([])
       setSoldItems([])
@@ -108,7 +139,7 @@ export default function App() {
     }
   }
 
-  // ── Stock Add (Wholesale Total Batch Weight) ──────────────────────────────
+  // ── Stock Add ─────────────────────────────────────────────────────────────
   const addProduct = async (newProduct) => {
     const totalWeight = parseFloat(newProduct.weight || 0)
     const qty = parseInt(newProduct.quantity || 1)
@@ -119,17 +150,20 @@ export default function App() {
       subcategory: newProduct.subcategory || '',
       variant: newProduct.variant,
       detail: newProduct.detail || '',
-      weight: totalWeight, // Represents TOTAL batch weight (e.g. 600g for 20 pcs)
+      weight: totalWeight,
       quantity: qty,
-      createdAt: newProduct.customDate || new Date().toISOString()
+      created_at: newProduct.customDate || new Date().toISOString()
     }
 
     setProducts(prev => [newEntry, ...prev])
     await insertSupabaseRecord('products', newEntry)
+    syncFromCloud()
   }
 
-  const deleteProduct = (id) => {
+  const deleteProduct = async (id) => {
     setProducts(prev => prev.filter(p => String(p.id) !== String(id)))
+    await deleteSupabaseRecord('products', id)
+    syncFromCloud()
   }
 
   // ── Buyback Add / Delete ───────────────────────────────────────────────────
@@ -140,28 +174,43 @@ export default function App() {
       itemName: buybackData.itemName,
       weight: parseFloat(buybackData.weight || 0),
       amount: parseFloat(buybackData.amount || 0),
-      detail: buybackData.detail || ''
+      detail: buybackData.detail || '',
+      created_at: new Date().toISOString()
     }
     setBuybacks(prev => [newBuyback, ...prev])
     await insertSupabaseRecord('buybacks', newBuyback)
+    syncFromCloud()
   }
 
-  const deleteBuyback = (id) => {
+  const deleteBuyback = async (id) => {
     setBuybacks(prev => prev.filter(b => String(b.id) !== String(id)))
+    await deleteSupabaseRecord('buybacks', id)
+    syncFromCloud()
   }
 
   // ── Service Add / Delete ───────────────────────────────────────────────────
   const addService = async (serviceData) => {
     const newEntry = {
       id: String(Date.now()),
-      ...serviceData
+      ...serviceData,
+      created_at: new Date().toISOString()
     }
     setServiceEntries(prev => [newEntry, ...prev])
     await insertSupabaseRecord('services', newEntry)
+    syncFromCloud()
   }
 
-  const deleteService = (id) => {
+  const deleteService = async (id) => {
     setServiceEntries(prev => prev.filter(s => String(s.id) !== String(id)))
+    await deleteSupabaseRecord('services', id)
+    syncFromCloud()
+  }
+
+  // ── Sale Delete ────────────────────────────────────────────────────────────
+  const deleteSale = async (id) => {
+    setSoldItems(prev => prev.filter(s => String(s.id) !== String(id)))
+    await deleteSupabaseRecord('sales', id)
+    syncFromCloud()
   }
 
   // ── Sale Processing ────────────────────────────────────────────────────────
@@ -187,8 +236,11 @@ export default function App() {
         updatedProducts[pIdx] = {
           ...prod,
           quantity: newQty,
-          weight: newTotalWeight // Remaining TOTAL batch weight
+          weight: newTotalWeight
         }
+
+        // Update product stock in cloud
+        await updateSupabaseRecord('products', prod.id, { quantity: newQty, weight: newTotalWeight })
       }
 
       const saleRecord = {
@@ -207,7 +259,8 @@ export default function App() {
         totalAmount: item.totalAmount,
         discountAmount: item.discountAmount || 0,
         total: item.total,
-        date
+        date,
+        created_at: date
       }
 
       newSales.push(saleRecord)
@@ -216,6 +269,7 @@ export default function App() {
 
     setProducts(updatedProducts)
     setSoldItems(prev => [...newSales, ...prev])
+    syncFromCloud()
 
     return {
       billNo,
@@ -237,11 +291,6 @@ export default function App() {
   if (!user) {
     if (showSignup) return <Signup onBack={() => setShowSignup(false)} onSignupSuccess={() => setShowSignup(false)} />
     return <Login onLogin={setUser} onShowSignup={() => setShowSignup(true)} />
-  }
-
-  const deleteSale = async (id) => {
-    setSoldItems(prev => prev.filter(s => String(s.id) !== String(id)))
-    await deleteSupabaseRecord('sales', id)
   }
 
   // ── Pages ──────────────────────────────────────────────────────────────────

@@ -17,10 +17,11 @@ try {
 export const fetchSupabaseData = async (table) => {
   try {
     if (!supabase) return null
-    const { data, error } = await supabase.from(table).select('*')
+    const { data, error } = await supabase.from(table).select('*').order('created_at', { ascending: false }).catch(() => supabase.from(table).select('*'))
     if (error) {
-      console.warn(`Supabase fetch error for ${table}:`, error.message)
-      return null
+      // Fallback simple query
+      const res = await supabase.from(table).select('*')
+      return res.data || null
     }
     return data
   } catch (err) {
@@ -40,6 +41,21 @@ export const insertSupabaseRecord = async (table, record) => {
     return data
   } catch (err) {
     console.warn(`Supabase insert exception for ${table}:`, err.message)
+    return null
+  }
+}
+
+export const updateSupabaseRecord = async (table, id, updates) => {
+  try {
+    if (!supabase) return null
+    const { data, error } = await supabase.from(table).update(updates).eq('id', id).select()
+    if (error) {
+      console.warn(`Supabase update error for ${table}:`, error.message)
+      return null
+    }
+    return data
+  } catch (err) {
+    console.warn(`Supabase update exception for ${table}:`, err.message)
     return null
   }
 }
