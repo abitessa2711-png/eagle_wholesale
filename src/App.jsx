@@ -10,19 +10,27 @@ import SoldItems      from './components/SoldItems'
 import StockDashboard from './components/StockDashboard'
 import OldBuyback     from './components/OldBuyback'
 import ServiceLog     from './components/ServiceLog'
-import { fetchSupabaseData, insertSupabaseRecord, updateSupabaseRecord, deleteSupabaseRecord, clearSupabaseTable } from './supabaseClient'
+import { fetchSupabaseData, insertSupabaseRecord, updateSupabaseRecord, deleteSupabaseRecord } from './supabaseClient'
 
 export default function App() {
-  // ── Auth ───────────────────────────────────────────────────────────────────
-  const [user, setUser]                 = useState(null)
+  // ── Auth Persistence Across Reloads ─────────────────────────────────────────
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('eagle_logged_user_session_v1')
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
+
   const [showSignup, setShowSignup]     = useState(false)
   const [activeTab, setActiveTab]       = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  // ── State ──────────────────────────────────────────────────────────────────
+  // ── Data Stores ────────────────────────────────────────────────────────────
   const [products, setProducts]   = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_live_store_products')
+      const saved = localStorage.getItem('eagle_wholesale_production_v2_products')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -31,7 +39,7 @@ export default function App() {
 
   const [soldItems, setSoldItems] = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_live_store_sales')
+      const saved = localStorage.getItem('eagle_wholesale_production_v2_sales')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -40,7 +48,7 @@ export default function App() {
 
   const [buybacks, setBuybacks]   = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_live_store_buybacks')
+      const saved = localStorage.getItem('eagle_wholesale_production_v2_buybacks')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -49,14 +57,14 @@ export default function App() {
 
   const [serviceEntries, setServiceEntries] = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_wholesale_live_store_services')
+      const saved = localStorage.getItem('eagle_wholesale_production_v2_services')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
     }
   })
 
-  // ── 100% Real-Time Simultaneous Sync between Phone & Laptop ────────────────
+  // ── 100% Real-Time Cloud Synchronization (Phone & Laptop Multi-Device Sync) ──
   const syncFromCloud = useCallback(async () => {
     try {
       const [dbProducts, dbSales, dbBuybacks, dbServices] = await Promise.all([
@@ -68,22 +76,22 @@ export default function App() {
 
       if (Array.isArray(dbProducts)) {
         setProducts(dbProducts)
-        localStorage.setItem('eagle_wholesale_live_store_products', JSON.stringify(dbProducts))
+        localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(dbProducts))
       }
       if (Array.isArray(dbSales)) {
         setSoldItems(dbSales)
-        localStorage.setItem('eagle_wholesale_live_store_sales', JSON.stringify(dbSales))
+        localStorage.setItem('eagle_wholesale_production_v2_sales', JSON.stringify(dbSales))
       }
       if (Array.isArray(dbBuybacks)) {
         setBuybacks(dbBuybacks)
-        localStorage.setItem('eagle_wholesale_live_store_buybacks', JSON.stringify(dbBuybacks))
+        localStorage.setItem('eagle_wholesale_production_v2_buybacks', JSON.stringify(dbBuybacks))
       }
       if (Array.isArray(dbServices)) {
         setServiceEntries(dbServices)
-        localStorage.setItem('eagle_wholesale_live_store_services', JSON.stringify(dbServices))
+        localStorage.setItem('eagle_wholesale_production_v2_services', JSON.stringify(dbServices))
       }
     } catch (err) {
-      console.warn('Realtime cloud sync error:', err)
+      console.warn('Realtime sync exception:', err)
     }
   }, [])
 
@@ -91,10 +99,10 @@ export default function App() {
     // Initial fetch on mount
     syncFromCloud()
 
-    // 1. Polling sync every 2 seconds across all devices
-    const interval = setInterval(syncFromCloud, 2000)
+    // Real-time synchronization every 1.5 seconds across all open devices
+    const interval = setInterval(syncFromCloud, 1500)
 
-    // 2. Immediate sync when user switches tabs or focuses browser on phone/laptop
+    // Immediate sync on window focus and visibility change
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         syncFromCloud()
@@ -111,32 +119,14 @@ export default function App() {
     }
   }, [syncFromCloud])
 
-  const handleLogout = () => {
-    setUser(null)
+  const handleLogin = (userData) => {
+    setUser(userData)
+    localStorage.setItem('eagle_logged_user_session_v1', JSON.stringify(userData))
   }
 
-  const handleResetAllData = async () => {
-    if (confirm('அனைத்து டெமோ/டெஸ்ட் பதிவுகளையும் நீக்கி புதிய நிலைக்கு ரீசெட் செய்ய விரும்புகிறீர்களா? (Clear all data for clean client launch?)')) {
-      // Clear localStorage
-      localStorage.removeItem('eagle_wholesale_live_store_products')
-      localStorage.removeItem('eagle_wholesale_live_store_sales')
-      localStorage.removeItem('eagle_wholesale_live_store_buybacks')
-      localStorage.removeItem('eagle_wholesale_live_store_services')
-
-      // Clear Cloud Database Tables
-      await Promise.all([
-        clearSupabaseTable('products'),
-        clearSupabaseTable('sales'),
-        clearSupabaseTable('buybacks'),
-        clearSupabaseTable('services')
-      ])
-
-      setProducts([])
-      setSoldItems([])
-      setBuybacks([])
-      setServiceEntries([])
-      alert('அனைத்து பதிவுகளும் முழுமையாக நீக்கப்பட்டுவிட்டன! கிளைண்ட் புதிய சரக்குகளைப் பதிவு செய்யலாம்.')
-    }
+  const handleLogout = () => {
+    setUser(null)
+    localStorage.removeItem('eagle_logged_user_session_v1')
   }
 
   // ── Stock Add ─────────────────────────────────────────────────────────────
@@ -155,12 +145,16 @@ export default function App() {
       createdAt: newProduct.customDate || new Date().toISOString()
     }
 
-    setProducts(prev => [newEntry, ...prev])
+    const updated = [newEntry, ...products]
+    setProducts(updated)
+    localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updated))
     await insertSupabaseRecord('products', newEntry)
   }
 
   const deleteProduct = async (id) => {
-    setProducts(prev => prev.filter(p => String(p.id) !== String(id)))
+    const updated = products.filter(p => String(p.id) !== String(id))
+    setProducts(updated)
+    localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updated))
     await deleteSupabaseRecord('products', id)
   }
 
@@ -174,12 +168,16 @@ export default function App() {
       amount: parseFloat(buybackData.amount || 0),
       detail: (buybackData.customerName ? `${buybackData.customerName} ` : '') + (buybackData.mobile ? `(${buybackData.mobile}) ` : '') + (buybackData.detail || '')
     }
-    setBuybacks(prev => [newBuyback, ...prev])
+    const updated = [newBuyback, ...buybacks]
+    setBuybacks(updated)
+    localStorage.setItem('eagle_wholesale_production_v2_buybacks', JSON.stringify(updated))
     await insertSupabaseRecord('buybacks', newBuyback)
   }
 
   const deleteBuyback = async (id) => {
-    setBuybacks(prev => prev.filter(b => String(b.id) !== String(id)))
+    const updated = buybacks.filter(b => String(b.id) !== String(id))
+    setBuybacks(updated)
+    localStorage.setItem('eagle_wholesale_production_v2_buybacks', JSON.stringify(updated))
     await deleteSupabaseRecord('buybacks', id)
   }
 
@@ -195,18 +193,24 @@ export default function App() {
       notes: (serviceData.customerName ? `வாடிக்கையாளர்: ${serviceData.customerName} ` : '') + (serviceData.mobile ? `(${serviceData.mobile}) ` : '') + (serviceData.notes || ''),
       status: serviceData.status || 'Completed'
     }
-    setServiceEntries(prev => [newEntry, ...prev])
+    const updated = [newEntry, ...serviceEntries]
+    setServiceEntries(updated)
+    localStorage.setItem('eagle_wholesale_production_v2_services', JSON.stringify(updated))
     await insertSupabaseRecord('services', newEntry)
   }
 
   const deleteService = async (id) => {
-    setServiceEntries(prev => prev.filter(s => String(s.id) !== String(id)))
+    const updated = serviceEntries.filter(s => String(s.id) !== String(id))
+    setServiceEntries(updated)
+    localStorage.setItem('eagle_wholesale_production_v2_services', JSON.stringify(updated))
     await deleteSupabaseRecord('services', id)
   }
 
   // ── Sale Delete ────────────────────────────────────────────────────────────
   const deleteSale = async (id) => {
-    setSoldItems(prev => prev.filter(s => String(s.id) !== String(id)))
+    const updated = soldItems.filter(s => String(s.id) !== String(id))
+    setSoldItems(updated)
+    localStorage.setItem('eagle_wholesale_production_v2_sales', JSON.stringify(updated))
     await deleteSupabaseRecord('sales', id)
   }
 
@@ -236,7 +240,7 @@ export default function App() {
           weight: newTotalWeight
         }
 
-        // Update product stock in Cloud Database
+        // Update in Supabase
         await updateSupabaseRecord('products', prod.id, { quantity: newQty, weight: newTotalWeight })
       }
 
@@ -262,7 +266,11 @@ export default function App() {
     }
 
     setProducts(updatedProducts)
-    setSoldItems(prev => [...newSales, ...prev])
+    localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updatedProducts))
+    
+    const updatedSales = [...newSales, ...soldItems]
+    setSoldItems(updatedSales)
+    localStorage.setItem('eagle_wholesale_production_v2_sales', JSON.stringify(updatedSales))
 
     return {
       billNo,
@@ -283,7 +291,7 @@ export default function App() {
   // ── Auth gates ─────────────────────────────────────────────────────────────
   if (!user) {
     if (showSignup) return <Signup onBack={() => setShowSignup(false)} onSignupSuccess={() => setShowSignup(false)} />
-    return <Login onLogin={setUser} onShowSignup={() => setShowSignup(true)} />
+    return <Login onLogin={handleLogin} onShowSignup={() => setShowSignup(true)} />
   }
 
   // ── Pages ──────────────────────────────────────────────────────────────────
@@ -312,7 +320,6 @@ export default function App() {
         <Header
           username={user?.name || 'Admin'}
           onLogout={handleLogout}
-          onResetAllData={handleResetAllData}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
         <main className="container animate-fade-in">

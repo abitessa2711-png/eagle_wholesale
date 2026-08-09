@@ -17,11 +17,10 @@ try {
 export const fetchSupabaseData = async (table) => {
   try {
     if (!supabase) return null
-    const { data, error } = await supabase.from(table).select('*').order('created_at', { ascending: false }).catch(() => supabase.from(table).select('*'))
+    const { data, error } = await supabase.from(table).select('*')
     if (error) {
-      // Fallback simple query
-      const res = await supabase.from(table).select('*')
-      return res.data || null
+      console.warn(`Supabase fetch error for ${table}:`, error.message)
+      return null
     }
     return data
   } catch (err) {
