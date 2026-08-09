@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { MASTER_DATA } from '../data/masterData'
+import { MASTER_DATA, KOLUSU_VIVARAM } from '../data/masterData'
 import { Plus, CheckCircle2 } from 'lucide-react'
 
 const CATEGORIES = Object.keys(MASTER_DATA)
@@ -31,10 +31,24 @@ const AddStock = ({ onAddProduct }) => {
   }
 
   const getDetails = () => {
-    if (formData.category === 'கொலுசு' && MASTER_DATA['கொலுசு']['விவரம்'] && formData.variant) {
-      return MASTER_DATA['கொலுசு']['விவரம்'][formData.variant] || []
+    if (formData.category === 'கொலுசு') {
+      return KOLUSU_VIVARAM
     }
     return []
+  }
+
+  const handleVariantChange = (variantVal) => {
+    let autoWeight = formData.weight
+    const match = variantVal.match(/\(([\d.]+)\s*g\)/)
+    if (match && match[1]) {
+      autoWeight = match[1]
+    }
+    setFormData(prev => ({
+      ...prev,
+      variant: variantVal,
+      weight: autoWeight,
+      detail: ''
+    }))
   }
 
   const handleSubmit = async (e) => {
@@ -108,7 +122,7 @@ const AddStock = ({ onAddProduct }) => {
               <label>1. முக்கியப் பிரிவு (Main Category) *</label>
               <select 
                 value={formData.category} 
-                onChange={e => setFormData({ ...formData, category: e.target.value, subcategory: '', variant: '', detail: '' })} 
+                onChange={e => setFormData({ ...formData, category: e.target.value, subcategory: '', variant: '', detail: '', weight: '' })} 
                 required
               >
                 <option value="">— பிரிவு தேர்வு செய்க (Select Category) —</option>
@@ -121,7 +135,7 @@ const AddStock = ({ onAddProduct }) => {
               {availableSubs.length > 0 ? (
                 <select 
                   value={formData.subcategory} 
-                  onChange={e => setFormData({ ...formData, subcategory: e.target.value, variant: '', detail: '' })} 
+                  onChange={e => setFormData({ ...formData, subcategory: e.target.value, variant: '', detail: '', weight: '' })} 
                   disabled={!formData.category}
                   required
                 >
@@ -161,15 +175,15 @@ const AddStock = ({ onAddProduct }) => {
           {/* Row 2: Variant & Detail */}
           <div className="form-grid" style={{ marginBottom: 14 }}>
             <div className="form-group">
-              <label>3. மாடல் / பொருள் பெயர் (Variant / Model) *</label>
+              <label>3. மாடல் / அளவு / பொருள் பெயர் (Variant / Size) *</label>
               {availableVariants.length > 0 ? (
                 <select 
                   value={formData.variant} 
-                  onChange={e => setFormData({ ...formData, variant: e.target.value, detail: '' })} 
+                  onChange={e => handleVariantChange(e.target.value)} 
                   disabled={!formData.subcategory}
                   required
                 >
-                  <option value="">— மாடல் தேர்வு செய்க (Select Variant) —</option>
+                  <option value="">— மாடல் / அளவு தேர்வு செய்க (Select Variant) —</option>
                   {availableVariants.map(v => <option key={v} value={v}>{v}</option>)}
                   <option value="__other__">+ புதிய மாடல் பெயர் (Custom / Other)...</option>
                 </select>
@@ -189,13 +203,13 @@ const AddStock = ({ onAddProduct }) => {
             </div>
 
             <div className="form-group">
-              <label>4. கூடுதல் விவரம் (Detail / Note)</label>
+              <label>4. கூடுதல் விவரம் / முத்து (Detail / Pearls)</label>
               {availableDetails.length > 0 ? (
                 <select 
                   value={formData.detail} 
                   onChange={e => setFormData({ ...formData, detail: e.target.value })}
                 >
-                  <option value="">— கூடுதல் விவரம் (Select Detail) —</option>
+                  <option value="">— முத்து / விவரம் தேர்வு செய்க (Select Detail) —</option>
                   {availableDetails.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               ) : (
@@ -225,7 +239,7 @@ const AddStock = ({ onAddProduct }) => {
           {/* Row 3: Weight, Quantity & Date */}
           <div className="form-grid" style={{ marginBottom: 18 }}>
             <div className="form-group">
-              <label>5. தனி எடை (Unit Weight in g)</label>
+              <label>5. எடை (Unit Weight in g)</label>
               <input 
                 type="number" 
                 step="0.001" 
