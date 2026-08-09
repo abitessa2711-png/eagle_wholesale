@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ShoppingBag, Plus, Trash2, AlertTriangle, Printer } from 'lucide-react'
+import { ShoppingBag, Plus, Trash2, AlertTriangle, Printer, Search } from 'lucide-react'
 import BillModal from './BillModal'
 
 const SellDashboard = ({ products = [], processSale }) => {
@@ -13,6 +13,7 @@ const SellDashboard = ({ products = [], processSale }) => {
   const [oldSilverAmount, setOldSilverAmount] = useState('')
   const [cart, setCart]                 = useState([])
   
+  const [weightFilter, setWeightFilter] = useState('')
   const [selectedProductId, setSelectedProductId] = useState('')
   const [sellQty, setSellQty]           = useState('1')
   const [sellWeight, setSellWeight]     = useState('')
@@ -47,13 +48,30 @@ const SellDashboard = ({ products = [], processSale }) => {
   const handleProductChange = (prodId) => {
     setSelectedProductId(prodId)
     setError('')
-    setSellWeight('') // Strictly manual typing, no automatic filling!
+    setSellWeight('') // Strictly manual typing
   }
 
   const handleQtyChange = (qtyVal) => {
     setSellQty(qtyVal)
     setError('')
   }
+
+  // Weight & Name Matching Search Filter
+  const searchMatchedProducts = products.filter(p => {
+    if ((p.weight || 0) <= 0.001) return false
+    if (!weightFilter.trim()) return true
+
+    const term = weightFilter.trim().toLowerCase()
+    const matchName = p.variant?.toLowerCase().includes(term) ||
+                      p.category?.toLowerCase().includes(term) ||
+                      p.subcategory?.toLowerCase().includes(term) ||
+                      p.detail?.toLowerCase().includes(term)
+    
+    const weightStr = (p.weight || 0).toString()
+    const matchWeight = weightStr.includes(term) || (p.variant && p.variant.toLowerCase().includes(term))
+
+    return matchName || matchWeight
+  })
 
   const addToCart = () => {
     if (!selectedProductId) {
@@ -113,6 +131,7 @@ const SellDashboard = ({ products = [], processSale }) => {
     setSellWeight('')
     setGrossAmount('')
     setDiscount('0')
+    setWeightFilter('')
   }
 
   const removeFromCart = (index) => {
@@ -136,6 +155,7 @@ const SellDashboard = ({ products = [], processSale }) => {
       setOldGoldAmount('')
       setOldSilverWeight('')
       setOldSilverAmount('')
+      setWeightFilter('')
     } catch (err) {
       setError(err.message || 'விற்பனை செயலாக்கத்தில் பிழை')
     } finally {
@@ -265,11 +285,70 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          {/* Section 3: Product Selection & Manual Weight Entry */}
+          {/* Section 3: Product Selection & Weight Search */}
           <div className="card-title" style={{ fontSize: '14.5px', marginBottom: 12, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
             3. பொருள் சேர்த்தல் (Add Product to Bill)
           </div>
 
+          {/* Instant Weight & Name Search Filter */}
+          <div className="form-group" style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Search size={14} /> எடை அல்லது பெயர் மூலம் தேடுக (Search by Weight g / Name)
+            </label>
+            <input
+              type="text"
+              placeholder="எ.கா. 1.5, 30, 600, கொலுசு, 1 inch 1.500g..."
+              value={weightFilter}
+              onChange={e => setWeightFilter(e.target.value)}
+              style={{ borderColor: weightFilter ? 'var(--gold)' : undefined, height: '38px', fontSize: '13px' }}
+            />
+          </div>
+
+          {/* Quick Click Search Results */}
+          {weightFilter.trim() && (
+            <div style={{ maxHeight: '160px', overflowY: 'auto', marginBottom: 12, border: '1px solid rgba(200, 169, 106, 0.3)', borderRadius: 8, padding: 6, background: 'rgba(26, 61, 99, 0.08)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--gold)', fontWeight: 700, marginBottom: 6, paddingLeft: 4 }}>
+                பொருந்திய பொருட்கள் ({searchMatchedProducts.length} items found):
+              </div>
+              {searchMatchedProducts.map(p => (
+                <div
+                  key={p.id}
+                  onClick={() => {
+                    handleProductChange(p.id)
+                    setWeightFilter('')
+                  }}
+                  style={{
+                    padding: '7px 10px',
+                    borderRadius: 6,
+                    background: String(selectedProductId) === String(p.id) ? 'rgba(200, 169, 106, 0.25)' : 'var(--card)',
+                    border: '1px solid var(--border)',
+                    marginBottom: 4,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    transition: 'all 0.15s ease'
+                  }}
+                  className="hover-highlight"
+                >
+                  <div>
+                    <span style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text-main)' }}>{p.variant}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-sub)', marginLeft: 6 }}>({p.category})</span>
+                  </div>
+                  <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--gold)', fontSize: '12.5px' }}>
+                    {p.category === 'கொடி' ? `1 pc | ${p.weight?.toFixed(3)}g` : `${p.quantity} pcs | ${p.weight?.toFixed(3)}g`}
+                  </div>
+                </div>
+              ))}
+              {searchMatchedProducts.length === 0 && (
+                <div style={{ fontSize: '12px', color: 'var(--text-sub)', textAlign: 'center', padding: 8 }}>
+                  பொருந்திய பொருட்கள் எதுவும் இல்லை
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Product Dropdown Select */}
           <div className="form-group" style={{ marginBottom: 12 }}>
             <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
               <span>இருப்பில் உள்ள பொருள் (Select Product) *</span>
@@ -286,7 +365,7 @@ const SellDashboard = ({ products = [], processSale }) => {
               onChange={e => handleProductChange(e.target.value)}
             >
               <option value="">— பொருளைத் தேர்ந்தெடுக்கவும் —</option>
-              {products.filter(p => (p.weight || 0) > 0.001).map(p => {
+              {searchMatchedProducts.map(p => {
                 const itemInCartWt = cart.filter(i => String(i.productId) === String(p.id)).reduce((s, i) => s + (i.totalWeight || 0), 0)
                 const itemInCartQty = cart.filter(i => String(i.productId) === String(p.id)).reduce((s, i) => s + (i.quantity || 0), 0)
                 const remQty = Math.max(0, p.quantity - itemInCartQty)
