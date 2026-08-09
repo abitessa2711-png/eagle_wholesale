@@ -13,16 +13,8 @@ import ServiceLog     from './components/ServiceLog'
 import { fetchSupabaseData, insertSupabaseRecord, updateSupabaseRecord, deleteSupabaseRecord } from './supabaseClient'
 
 export default function App() {
-  // ── Auth Persistence Across Reloads ─────────────────────────────────────────
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('eagle_logged_user_session_v1')
-      return saved ? JSON.parse(saved) : null
-    } catch {
-      return null
-    }
-  })
-
+  // ── Auth (Always require Login when opening the website) ───────────────────
+  const [user, setUser]                 = useState(null)
   const [showSignup, setShowSignup]     = useState(false)
   const [activeTab, setActiveTab]       = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -121,12 +113,10 @@ export default function App() {
 
   const handleLogin = (userData) => {
     setUser(userData)
-    localStorage.setItem('eagle_logged_user_session_v1', JSON.stringify(userData))
   }
 
   const handleLogout = () => {
     setUser(null)
-    localStorage.removeItem('eagle_logged_user_session_v1')
   }
 
   // ── Stock Add ─────────────────────────────────────────────────────────────
