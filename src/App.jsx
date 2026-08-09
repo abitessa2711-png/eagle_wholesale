@@ -96,9 +96,9 @@ export default function App() {
     setUser(null)
   }
 
-  // ── Stock Add ─────────────────────────────────────────────────────────────
+  // ── Stock Add (Wholesale Total Batch Weight) ──────────────────────────────
   const addProduct = async (newProduct) => {
-    const unitWeight = parseFloat(newProduct.weight || 0)
+    const totalWeight = parseFloat(newProduct.weight || 0)
     const qty = parseInt(newProduct.quantity || 1)
 
     const newEntry = {
@@ -107,7 +107,7 @@ export default function App() {
       subcategory: newProduct.subcategory || '',
       variant: newProduct.variant,
       detail: newProduct.detail || '',
-      weight: unitWeight,
+      weight: totalWeight, // Represents TOTAL batch weight (e.g. 600g for 20 pcs)
       quantity: qty,
       createdAt: newProduct.customDate || new Date().toISOString()
     }
@@ -166,17 +166,16 @@ export default function App() {
       if (pIdx !== -1) {
         const prod = updatedProducts[pIdx]
         const soldQty = item.quantity
-        const soldWeight = item.totalWeight || (soldQty * (prod.weight || 0))
+        const soldWeight = item.totalWeight || 0
         const newQty = Math.max(0, prod.quantity - soldQty)
         
-        const currentTotalWeight = (prod.quantity * (prod.weight || 0))
+        const currentTotalWeight = prod.weight || 0
         const newTotalWeight = Math.max(0, currentTotalWeight - soldWeight)
-        const newUnitWeight = newQty > 0 ? (newTotalWeight / newQty) : 0
         
         updatedProducts[pIdx] = {
           ...prod,
           quantity: newQty,
-          weight: newUnitWeight
+          weight: newTotalWeight // Remaining TOTAL batch weight
         }
       }
 

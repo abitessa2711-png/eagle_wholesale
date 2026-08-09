@@ -2,8 +2,8 @@ import React from 'react'
 import { Package, TrendingUp, AlertTriangle } from 'lucide-react'
 
 const Dashboard = ({ products = [], sales = [], setActiveTab }) => {
-  // Aggregate Stats
-  const totalWeight = products.reduce((s, p) => s + ((p.quantity || 0) * (p.weight || 0)), 0)
+  // Aggregate Stats (Wholesale Batch Weights)
+  const totalWeight = products.reduce((s, p) => s + (p.weight || 0), 0)
   const totalQty    = products.reduce((s, p) => s + (p.quantity || 0), 0)
   
   const productGroups = {};
@@ -13,7 +13,7 @@ const Dashboard = ({ products = [], sales = [], setActiveTab }) => {
       productGroups[key] = { ...p, totalQuantity: 0, totalWeight: 0 };
     }
     productGroups[key].totalQuantity += (p.quantity || 0);
-    productGroups[key].totalWeight += ((p.quantity || 0) * (p.weight || 0));
+    productGroups[key].totalWeight += (p.weight || 0);
   });
   
   const lowStock = Object.values(productGroups).filter(g => g.totalQuantity < 3);
@@ -85,7 +85,7 @@ const Dashboard = ({ products = [], sales = [], setActiveTab }) => {
                     </td>
                     <td><span className="badge badge-blue">{p.category}</span></td>
                     <td style={{ textAlign: 'right' }}>
-                      <span className="text-gold fw-600">{p.quantity} pcs | {(p.quantity * p.weight).toFixed(2)}g</span>
+                      <span className="text-gold fw-600">{p.quantity} pcs | {(p.weight || 0).toFixed(2)}g</span>
                     </td>
                   </tr>
                 ))}

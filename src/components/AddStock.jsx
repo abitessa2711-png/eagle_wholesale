@@ -236,26 +236,14 @@ const AddStock = ({ onAddProduct }) => {
             </div>
           )}
 
-          {/* Row 3: Weight, Quantity & Date */}
-          <div className="form-grid" style={{ marginBottom: 18 }}>
+          {/* Row 3: Quantity & Total Weight */}
+          <div className="form-grid" style={{ marginBottom: 14 }}>
             <div className="form-group">
-              <label>5. எடை (Unit Weight in g)</label>
-              <input 
-                type="number" 
-                step="0.001" 
-                min="0"
-                placeholder="0.000"
-                value={formData.weight}
-                onChange={e => setFormData({ ...formData, weight: e.target.value })}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>6. எண்ணிக்கை (Quantity in pcs) *</label>
+              <label>5. மொத்த எண்ணிக்கை (Total Quantity in pcs) *</label>
               <input 
                 type="number" 
                 min="1"
-                placeholder="1"
+                placeholder="எ.கா. 20"
                 value={formData.quantity}
                 onChange={e => setFormData({ ...formData, quantity: e.target.value })}
                 required 
@@ -263,27 +251,41 @@ const AddStock = ({ onAddProduct }) => {
             </div>
 
             <div className="form-group">
-              <label>7. தேதி & நேரம் (Date & Time) *</label>
+              <label>6. மொத்த எடை (Total Batch Weight in grams) *</label>
               <input 
-                type="datetime-local" 
-                value={formData.date}
-                onChange={e => setFormData({ ...formData, date: e.target.value })}
-                required 
+                type="number" 
+                step="0.001" 
+                min="0"
+                placeholder="எ.கா. 600.000"
+                value={formData.weight}
+                onChange={e => setFormData({ ...formData, weight: e.target.value })}
+                required
               />
             </div>
           </div>
 
-          <div style={{ marginTop: '10px' }}>
-            <button type="submit" className="btn btn-gold btn-full btn-lg" disabled={loading} style={{ height: '46px', fontSize: '15px' }}>
-              <Plus size={18} /> {loading ? 'சேமிக்கப்படுகிறது...' : '+ இருப்பில் சேர் (Add Stock)'}
+          {/* Row 4: Date & Time */}
+          <div className="form-group" style={{ marginBottom: 20 }}>
+            <label>7. சேர்க்கை தேதி & நேரம் (Stock Date & Time) *</label>
+            <input 
+              type="datetime-local" 
+              value={formData.date}
+              onChange={e => setFormData({ ...formData, date: e.target.value })}
+              required 
+            />
+          </div>
+
+          <div>
+            <button type="submit" className="btn btn-gold btn-full btn-lg" disabled={loading} style={{ height: '48px', fontSize: '15px', fontWeight: 800 }}>
+              <Plus size={18} /> {loading ? 'சேமிக்கப்படுகிறது...' : '+ சரக்கு இருப்பில் சேர் (Add Stock to Inventory)'}
             </button>
           </div>
         </form>
       </div>
       
-      <div style={{ marginTop: 12, background: 'rgba(229,184,105,0.06)', border: '1px dashed var(--gold)', padding: 10, borderRadius: 10 }}>
-        <p style={{ fontSize: '11.5px', color: 'var(--text-sub)', textAlign: 'center', margin: 0 }}>
-          💡 <strong>குறிப்பு:</strong> அனைத்துப் பிரிவுகள் (கொலுசு, கொடி, மெட்டி, தண்டை, கம்மல், செயின், வளையல், பாத்திரங்கள்) அனைத்திற்கும் எளிதாக சரக்கு சேர்க்கலாம்.
+      <div style={{ marginTop: 14, background: 'rgba(229,184,105,0.06)', border: '1px dashed var(--gold)', padding: '12px 16px', borderRadius: 12 }}>
+        <p style={{ fontSize: '12px', color: 'var(--text-sub)', textAlign: 'center', margin: 0, lineHeight: 1.4 }}>
+          💡 <strong>ஹோல்சேல் முறை:</strong> இங்கு உள்ளிடும் எடை என்பது மொத்த எண்ணிக்கைக்கான மொத்த எடை (Total Batch Weight) ஆகும். (உதாரணம்: 20 கொலுசுக்கு மொத்த எடை 600g).
         </p>
       </div>
     </div>

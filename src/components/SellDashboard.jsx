@@ -33,7 +33,7 @@ const SellDashboard = ({ products = [], processSale }) => {
     : 0
 
   const availQty = selectedProd ? Math.max(0, selectedProd.quantity - existingCartQty) : 0
-  const availWeight = selectedProd ? Math.max(0, (selectedProd.quantity * (selectedProd.weight || 0)) - existingCartWeight) : 0
+  const availWeight = selectedProd ? Math.max(0, (selectedProd.weight || 0) - existingCartWeight) : 0
 
   const parsedQty = parseInt(sellQty) || 0
   const parsedWeight = parseFloat(sellWeight) || 0
@@ -48,9 +48,10 @@ const SellDashboard = ({ products = [], processSale }) => {
     if (prod) {
       const alreadyQty = cart.filter(i => String(i.productId) === String(prod.id)).reduce((s, i) => s + (i.quantity || 0), 0)
       const alreadyWt = cart.filter(i => String(i.productId) === String(prod.id)).reduce((s, i) => s + (i.totalWeight || 0), 0)
-      const currentAvailWt = Math.max(0, (prod.quantity * (prod.weight || 0)) - alreadyWt)
+      const currentAvailWt = Math.max(0, (prod.weight || 0) - alreadyWt)
       const qty = parseInt(sellQty) || 1
-      const defaultWt = prod.weight ? Math.min(qty * prod.weight, currentAvailWt).toFixed(3) : ''
+      const avgUnitWt = prod.quantity > 0 ? (prod.weight / prod.quantity) : 0
+      const defaultWt = avgUnitWt > 0 ? Math.min(qty * avgUnitWt, currentAvailWt).toFixed(3) : ''
       setSellWeight(defaultWt)
     } else {
       setSellWeight('')
@@ -60,9 +61,10 @@ const SellDashboard = ({ products = [], processSale }) => {
   const handleQtyChange = (qtyVal) => {
     setSellQty(qtyVal)
     setError('')
-    if (selectedProd && selectedProd.weight) {
+    if (selectedProd && selectedProd.quantity > 0) {
       const qty = parseInt(qtyVal) || 1
-      const calculatedWt = (qty * selectedProd.weight)
+      const avgUnit = selectedProd.weight / selectedProd.quantity
+      const calculatedWt = (qty * avgUnit)
       setSellWeight(Math.min(calculatedWt, availWeight).toFixed(3))
     }
   }
@@ -303,7 +305,7 @@ const SellDashboard = ({ products = [], processSale }) => {
                   const itemInCartWt = cart.filter(i => String(i.productId) === String(p.id)).reduce((s, i) => s + (i.totalWeight || 0), 0)
                   const itemInCartQty = cart.filter(i => String(i.productId) === String(p.id)).reduce((s, i) => s + (i.quantity || 0), 0)
                   const remQty = Math.max(0, p.quantity - itemInCartQty)
-                  const remWt = Math.max(0, (p.quantity * (p.weight || 0)) - itemInCartWt)
+                  const remWt = Math.max(0, (p.weight || 0) - itemInCartWt)
                   return (
                     <option key={p.id} value={p.id} disabled={remQty <= 0 || remWt <= 0}>
                       {p.variant} ({p.category}) — இருப்பு: {remQty} pcs | {remWt.toFixed(2)}g

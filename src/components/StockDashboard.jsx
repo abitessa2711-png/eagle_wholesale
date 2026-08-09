@@ -47,24 +47,24 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
       {/* Desktop View Table (hidden on mobile) */}
       <div className="desktop-table-view card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="table-wrap">
-          <table style={{ minWidth: '640px' }}>
+          <table style={{ minWidth: '680px' }}>
             <thead>
               <tr>
                 <th style={{ width: '40px', textAlign: 'center' }}>#</th>
                 <th style={{ minWidth: '160px', textAlign: 'left' }}>பொருள் (Variant)</th>
                 <th style={{ minWidth: '100px', textAlign: 'left' }}>பிரிவு</th>
                 <th style={{ minWidth: '100px', textAlign: 'left' }}>உட்பிரிவு</th>
-                <th style={{ minWidth: '80px', textAlign: 'right' }}>எடை (g)</th>
-                <th style={{ minWidth: '80px', textAlign: 'center' }}>எண்ணிக்கை</th>
-                <th style={{ minWidth: '90px', textAlign: 'right' }}>மொத்த எடை</th>
+                <th style={{ minWidth: '85px', textAlign: 'center' }}>எண்ணிக்கை</th>
+                <th style={{ minWidth: '100px', textAlign: 'right' }}>மொத்த எடை (Total Wt)</th>
+                <th style={{ minWidth: '95px', textAlign: 'right' }}>1 pc சராசரி</th>
                 {role === 'admin' && <th style={{ width: '50px', textAlign: 'center' }}></th>}
               </tr>
             </thead>
             <tbody>
               {filtered.map((p, idx) => {
-                const unitWeight = p.weight || 0
+                const totalWt = p.weight || 0
                 const qty = p.quantity || 0
-                const totalWt = qty * unitWeight
+                const unitWeight = qty > 0 ? (totalWt / qty) : 0
 
                 return (
                   <tr key={p.id || idx}>
@@ -75,10 +75,12 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
                     </td>
                     <td><span className="badge badge-blue">{p.category}</span></td>
                     <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.subcategory || '-'}</td>
-                    <td style={{ textAlign: 'right' }}>{unitWeight > 0 ? `${unitWeight}g` : '-'}</td>
                     <td style={{ textAlign: 'center' }}><span className="text-gold fw-600">{qty} pcs</span></td>
                     <td style={{ textAlign: 'right' }} className="fw-700 text-gold">
                       {totalWt > 0 ? `${totalWt.toFixed(2)}g` : '-'}
+                    </td>
+                    <td style={{ textAlign: 'right', color: 'var(--text-sub)', fontSize: '12px' }}>
+                      {unitWeight > 0 ? `${unitWeight.toFixed(2)}g` : '-'}
                     </td>
                     {role === 'admin' && (
                       <td style={{ textAlign: 'center' }}>
@@ -106,9 +108,9 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
       {/* Mobile View Cards (100% Full Width, ZERO Sideways Scroll) */}
       <div className="mobile-card-list">
         {filtered.map((p, idx) => {
-          const unitWeight = p.weight || 0
+          const totalWt = p.weight || 0
           const qty = p.quantity || 0
-          const totalWt = qty * unitWeight
+          const unitWeight = qty > 0 ? (totalWt / qty) : 0
 
           return (
             <div key={p.id || idx} className="mobile-item-card">
@@ -144,7 +146,7 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
               {/* 3 Metric Box */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1.2fr',
+                gridTemplateColumns: '1fr 1.2fr 1fr',
                 gap: 6,
                 background: 'rgba(26, 61, 99, 0.06)',
                 border: '1px solid rgba(26, 61, 99, 0.10)',
@@ -153,16 +155,16 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
                 textAlign: 'center'
               }}>
                 <div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>தனி எடை</div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)' }}>{unitWeight > 0 ? `${unitWeight}g` : '-'}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>எண்ணிக்கை</div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>மொத்த அளவு</div>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>{qty} pcs</div>
                 </div>
                 <div>
                   <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>மொத்த எடை</div>
                   <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#1A3D63' }}>{totalWt > 0 ? `${totalWt.toFixed(2)}g` : '-'}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-sub)' }}>1 pc சராசரி</div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text-sub)' }}>{unitWeight > 0 ? `${unitWeight.toFixed(2)}g` : '-'}</div>
                 </div>
               </div>
             </div>
