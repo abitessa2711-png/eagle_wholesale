@@ -84,143 +84,143 @@ const ServicePrintModal = ({ service, onClose }) => {
   const netServiceFee = Math.max(0, (service.amount || 0) - (parseFloat(oldSilverAmount) || 0))
 
   return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-content" style={{ width: '780px', maxWidth: '94vw', background: '#091036' }}>
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()} style={{ padding: '8px', zIndex: 99999 }}>
+      <div className="modal-content" style={{ width: '780px', maxWidth: '96vw', background: '#091036', maxHeight: '96vh', overflowY: 'auto' }}>
         <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', fontFamily: 'Outfit, sans-serif' }}>சேவை ரசீது அச்சிடுதல் (Service Slip Preview)</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF', fontFamily: 'Outfit, sans-serif', margin: 0 }}>
+            சேவை ரசீது அச்சிடுதல் (Service Slip Preview)
+          </h3>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-gold" onClick={handlePrint}>
+            <button className="btn btn-gold" onClick={handlePrint} style={{ height: '34px', padding: '0 12px', fontSize: '12.5px' }}>
               <Printer size={14} /> அச்சிடு (Print)
             </button>
-            <button className="btn btn-ghost" onClick={onClose}>
-              <X size={14} />
+            <button className="btn btn-ghost" onClick={onClose} style={{ height: '34px', padding: '0 8px' }}>
+              <X size={16} />
             </button>
           </div>
         </div>
 
         {/* Gold, Silver & Old Silver Rate Input */}
-        <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 14, alignItems: 'center', background: '#0A0E1A', flexWrap: 'wrap' }}>
-          <div style={{ fontSize: 12, color: '#C8A96A', fontWeight: 700 }}>Today's Rate (பதிக்க):</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <label style={{ fontSize: 11, color: '#aaa', whiteSpace: 'nowrap' }}>Gold (தங்கம்) Rs/g:</label>
+        <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 10, alignItems: 'center', background: '#0A0E1A', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 12, color: '#C8A96A', fontWeight: 700 }}>Today's Rate:</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <label style={{ fontSize: 11, color: '#aaa', whiteSpace: 'nowrap' }}>Gold Rs/g:</label>
             <input
               type="number"
-              placeholder="e.g. 7200"
+              placeholder="7200"
               value={goldRate}
               onChange={e => setGoldRate(e.target.value)}
-              style={{ width: 85, padding: '4px 8px', fontSize: 12, borderRadius: 4, border: '1px solid #C8A96A', background: '#0D1526', color: '#fff', height: 30 }}
+              style={{ width: 75, padding: '4px 6px', fontSize: 12, borderRadius: 4, border: '1px solid #C8A96A', background: '#0D1526', color: '#fff', height: 28 }}
             />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <label style={{ fontSize: 11, color: '#aaa', whiteSpace: 'nowrap' }}>Silver (வெள்ளி) Rs/g:</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <label style={{ fontSize: 11, color: '#aaa', whiteSpace: 'nowrap' }}>Silver Rs/g:</label>
             <input
               type="number"
-              placeholder="e.g. 90"
+              placeholder="90"
               value={silverRate}
               onChange={e => setSilverRate(e.target.value)}
-              style={{ width: 85, padding: '4px 8px', fontSize: 12, borderRadius: 4, border: '1px solid #888', background: '#0D1526', color: '#fff', height: 30 }}
+              style={{ width: 75, padding: '4px 6px', fontSize: 12, borderRadius: 4, border: '1px solid #888', background: '#0D1526', color: '#fff', height: 28 }}
             />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <label style={{ fontSize: 11, color: '#aaa', whiteSpace: 'nowrap' }}>Old Silver Wt (g):</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <label style={{ fontSize: 11, color: '#aaa', whiteSpace: 'nowrap' }}>Old Silver Wt:</label>
             <input
               type="number"
               step="0.001"
-              placeholder="e.g. 25.5"
+              placeholder="25.5"
               value={oldSilverWeight}
               onChange={e => setOldSilverWeight(e.target.value)}
-              style={{ width: 85, padding: '4px 8px', fontSize: 12, borderRadius: 4, border: '1px solid #888', background: '#0D1526', color: '#fff', height: 30 }}
+              style={{ width: 75, padding: '4px 6px', fontSize: 12, borderRadius: 4, border: '1px solid #888', background: '#0D1526', color: '#fff', height: 28 }}
             />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <label style={{ fontSize: 11, color: '#aaa', whiteSpace: 'nowrap' }}>Old Silver (கழிப்பு ₹):</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <label style={{ fontSize: 11, color: '#aaa', whiteSpace: 'nowrap' }}>Old Silver Less ₹:</label>
             <input
               type="number"
-              placeholder="e.g. 1500"
+              placeholder="1500"
               value={oldSilverAmount}
               onChange={e => setOldSilverAmount(e.target.value)}
-              style={{ width: 85, padding: '4px 8px', fontSize: 12, borderRadius: 4, border: '1px solid #C8A96A', background: '#0D1526', color: '#fff', height: 30 }}
+              style={{ width: 75, padding: '4px 6px', fontSize: 12, borderRadius: 4, border: '1px solid #C8A96A', background: '#0D1526', color: '#fff', height: 28 }}
             />
           </div>
         </div>
 
-        <div className="bill-container" style={{ padding: '16px', background: '#060B28', display: 'flex', justifyContent: 'center' }}>
+        <div className="bill-container" style={{ padding: '12px 6px', background: '#060B28', display: 'flex', justifyContent: 'center' }}>
           <div id="printable-service-bill" style={{ width: '100%' }}>
             <div style={{
               width: '100%',
-              maxWidth: '190mm',
-              minHeight: '240mm',
+              maxWidth: '100%',
               background: '#FFFFFF',
-              padding: '12mm 14mm',
+              padding: '14px 12px',
               color: '#1E1E1E',
-              fontFamily: "'Noto Sans Tamil', sans-serif",
+              fontFamily: "'Noto Sans Tamil', -apple-system, sans-serif",
               fontSize: '11px',
-              border: '1px solid #ccc',
+              border: '1.5px solid #0F3D34',
               boxSizing: 'border-box',
               margin: '0 auto',
               letterSpacing: '0px'
             }}>
 
-              {/* Header Phone Number — Right Top, no emoji */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '9.5px', color: '#333', fontWeight: 700, marginBottom: 6 }}>
+              {/* Header Phone Number */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '9.5px', color: '#333', fontWeight: 700, marginBottom: 6, flexWrap: 'wrap' }}>
+                <div style={{ color: '#0F3D34', fontWeight: 800 }}>ESTD: 2026</div>
                 <div>Ph: +91 81480 03454, +91 73391 60876</div>
               </div>
 
               {/* Shop Title & Logo Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2.5px solid #0F3D34', paddingBottom: 8, marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2.5px solid #0F3D34', paddingBottom: 8, marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <EagleLogo size={48} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <EagleLogo size={42} />
                     <div>
-                      <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#0F3D34', margin: 0, lineHeight: 1.1 }}>
+                      <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0F3D34', margin: 0, lineHeight: 1.1 }}>
                         ஈகிள் சில்வர்ஸ்
                       </h1>
-                      {/* Wholesale & Retail Shop badge — print-safe green highlight */}
                       <div
                         className="ws-badge"
                         style={{
-                          fontSize: '12px',
+                          fontSize: '11px',
                           fontWeight: 800,
                           color: '#FFFFFF',
                           background: '#0F3D34',
                           WebkitPrintColorAdjust: 'exact',
                           printColorAdjust: 'exact',
                           display: 'inline-block',
-                          padding: '2px 8px',
+                          padding: '2px 6px',
                           borderRadius: '3px',
-                          marginTop: 4
+                          marginTop: 3
                         }}
                       >
                         Wholesale &amp; Retail Shop
                       </div>
                     </div>
                   </div>
-                  {/* Address — no emoji */}
-                  <div style={{ fontSize: '9.5px', color: '#444', marginTop: 5 }}>
+                  <div style={{ fontSize: '9.5px', color: '#444', marginTop: 4 }}>
                     8 - வடக்கு ரத வீதி, டவுன் போலீஸ் ஸ்டேஷன் ரோடு, சிவகாசி.
                   </div>
                 </div>
 
                 <div style={{
                   border: '1.5px solid #0F3D34',
-                  padding: '6px 12px',
+                  padding: '4px 10px',
                   borderRadius: '4px',
                   fontWeight: 800,
                   color: '#0F3D34',
-                  fontSize: '11.5px',
+                  fontSize: '11px',
                   background: '#F0F5F2'
                 }}>
                   SERVICE RECEIPT / சேவை பில்
                 </div>
               </div>
 
-              {/* Gold & Silver Rate Row — no emoji */}
+              {/* Gold & Silver Rate Row */}
               {(goldRate || silverRate) && (
                 <div
                   className="rate-row"
                   style={{
                     display: 'flex',
-                    gap: 20,
+                    gap: 12,
                     fontSize: '10px',
                     fontWeight: 700,
                     color: '#0F3D34',
@@ -229,13 +229,14 @@ const ServicePrintModal = ({ service, onClose }) => {
                     printColorAdjust: 'exact',
                     border: '1px solid #c8e0c8',
                     borderRadius: 4,
-                    padding: '5px 12px',
-                    marginBottom: 10
+                    padding: '5px 10px',
+                    marginBottom: 10,
+                    flexWrap: 'wrap'
                   }}
                 >
-                  <span>Today's Rate / இன்றைய விலை:</span>
-                  {goldRate && <span>Gold (தங்கம்): Rs.{goldRate}/g</span>}
-                  {silverRate && <span>Silver (வெள்ளி): Rs.{silverRate}/g</span>}
+                  <span>Today's Rate:</span>
+                  {goldRate && <span>Gold: Rs.{goldRate}/g</span>}
+                  {silverRate && <span>Silver: Rs.{silverRate}/g</span>}
                 </div>
               )}
 
@@ -243,135 +244,98 @@ const ServicePrintModal = ({ service, onClose }) => {
               <div style={{
                 border: '1px solid #0F3D34',
                 borderRadius: 4,
-                padding: '10px 14px',
-                marginBottom: 14,
+                padding: '8px 10px',
+                marginBottom: 10,
                 display: 'flex',
-                alignItems: 'center',
-                background: '#F9FBF9'
+                justifyContent: 'space-between',
+                background: '#F9FBF9',
+                flexWrap: 'wrap',
+                gap: 6
               }}>
-                <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontSize: '9.5px', color: '#666', marginBottom: 2 }}>வாடிக்கையாளர் விவரம் / Customer Info:</div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F3D34' }}>{service.customerName || service.notes || 'மாரி'}</div>
-                  <div style={{ fontSize: '11px', color: '#333', marginTop: 2, fontWeight: 600 }}>செல் / Ph: {service.mobile || '90909090'}</div>
+                <div>
+                  <div style={{ fontSize: '9px', color: '#666' }}>வாடிக்கையாளர் (Customer):</div>
+                  <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0F3D34' }}>{service.customerName || service.notes || 'மாரி'}</div>
+                  {service.mobile && <div style={{ fontSize: '10.5px', color: '#333', fontWeight: 600 }}>Ph: {service.mobile}</div>}
                 </div>
-                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-end', marginLeft: 'auto' }}>
-                  <div style={{ fontSize: '12px', color: '#0F3D34', textAlign: 'right' }}>
-                    <strong>பில் எண் / Receipt No :</strong> <span style={{ fontWeight: 800 }}>SVC-{service.id?.slice(-6) || '572173'}</span>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '11.5px', color: '#0F3D34' }}>
+                    <strong>பில் எண்:</strong> <span style={{ fontWeight: 800 }}>SVC-{service.id?.slice(-6) || '572173'}</span>
                   </div>
-                  <div style={{ fontSize: '10.5px', color: '#444', textAlign: 'right' }}>
-                    <strong>தேதி / Date :</strong> {service.date}
+                  <div style={{ fontSize: '10px', color: '#444' }}>
+                    <strong>தேதி:</strong> {service.date}
                   </div>
                 </div>
               </div>
 
               {/* Service Table */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1.5px solid #0F3D34', fontSize: '10.5px', marginBottom: 14, tableLayout: 'fixed' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1.5px solid #0F3D34', fontSize: '10.5px', marginBottom: 10 }}>
                 <thead>
-                  <tr style={{ background: '#0F3D34', color: '#FFFFFF', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                    <th style={{ padding: '8px 6px', borderRight: '1px solid #1a5c50', textAlign: 'left', width: '40%', color: '#FFFFFF', fontWeight: 700, background: '#0F3D34' }}>
-                      பொருள் விவரம் (ITEM DETAILS)
-                    </th>
-                    <th style={{ padding: '8px 6px', borderRight: '1px solid #1a5c50', textAlign: 'center', width: '25%', color: '#FFFFFF', fontWeight: 700, background: '#0F3D34' }}>
-                      சேவை வகை (SERVICE TYPE)
-                    </th>
-                    <th style={{ padding: '8px 6px', borderRight: '1px solid #1a5c50', textAlign: 'right', width: '18%', color: '#FFFFFF', fontWeight: 700, background: '#0F3D34' }}>
-                      எடை (WEIGHT)
-                    </th>
-                    <th style={{ padding: '8px 6px', textAlign: 'right', width: '17%', color: '#FFFFFF', fontWeight: 700, background: '#0F3D34' }}>
-                      கட்டணம் (FEE)
-                    </th>
+                  <tr style={{ background: '#0F3D34', color: '#FFFFFF' }}>
+                    <th style={{ padding: '6px 6px', textAlign: 'left', width: '42%' }}>பொருள் விவரம் (ITEM)</th>
+                    <th style={{ padding: '6px 6px', textAlign: 'center', width: '24%' }}>சேவை வகை</th>
+                    <th style={{ padding: '6px 6px', textAlign: 'right', width: '16%' }}>எடை (Wt)</th>
+                    <th style={{ padding: '6px 6px', textAlign: 'right', width: '18%' }}>கட்டணம் (Rs.)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{ height: '36px' }}>
-                    <td style={{ padding: '6px 8px', borderRight: '1px solid #ccc', fontWeight: 700, color: '#0F3D34' }}>
-                      {service.itemName}
-                    </td>
-                    <td style={{ padding: '6px 8px', borderRight: '1px solid #ccc', textAlign: 'center' }}>
-                      {service.serviceType}
-                    </td>
-                    <td style={{ padding: '6px 8px', borderRight: '1px solid #ccc', textAlign: 'right', fontWeight: 600 }}>
-                      {service.weight ? `${service.weight.toFixed(3)} g` : '-'}
-                    </td>
-                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 700, color: '#0F3D34' }}>
-                      Rs.{service.amount?.toLocaleString('en-IN')}
-                    </td>
+                  <tr>
+                    <td style={{ padding: '6px 6px', fontWeight: 700, color: '#0F3D34' }}>{service.itemName}</td>
+                    <td style={{ padding: '6px 6px', textAlign: 'center' }}>{service.serviceType}</td>
+                    <td style={{ padding: '6px 6px', textAlign: 'right', fontWeight: 600 }}>{service.weight ? `${service.weight.toFixed(3)}g` : '-'}</td>
+                    <td style={{ padding: '6px 6px', textAlign: 'right', fontWeight: 700, color: '#0F3D34' }}>Rs.{service.amount?.toLocaleString('en-IN')}</td>
                   </tr>
                 </tbody>
               </table>
 
-              {/* Summary & Instructions */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 14, marginBottom: 20 }}>
-                <div>
-                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#0F3D34', marginBottom: 4 }}>
-                    நிபந்தனைகள் / Instructions:
-                  </div>
-                  <div style={{ fontSize: '9.5px', color: '#1a1a1a', lineHeight: 1.6, fontWeight: 700 }}>
-                    <div>• 916 தங்க நகைகள் சிறந்த முறையில் ஆர்டரின் பேரில் செய்து தரப்படும்.</div>
-                    <div>• வெள்ளி கொலுசுகளுக்கு செய்கூலி, சேதாரம் இல்லை.</div>
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: '9.5px', fontWeight: 700, color: '#666' }}>வார்த்தைகளில் / Amount in words:</div>
-                    <div style={{ fontSize: '10px', fontWeight: 700, color: '#0F3D34', marginTop: 2 }}>
-                      {numberToWords(service.amount || 0)}
-                    </div>
-                  </div>
+              {/* Summary */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 10, marginBottom: 14 }}>
+                <div style={{ fontSize: '9.5px', color: '#444', lineHeight: 1.4 }}>
+                  <div style={{ fontWeight: 700, color: '#0F3D34' }}>நிபந்தனைகள்:</div>
+                  <div>• 916 தங்க நகைகள் சிறந்த முறையில் ஆர்டரின் பேரில் செய்து தரப்படும்.</div>
+                  <div>• வெள்ளி கொலுசுகளுக்கு செய்கூலி, சேதாரம் இல்லை.</div>
                 </div>
 
-                <div style={{ border: '1px solid #0F3D34', borderRadius: 5, padding: '8px 12px', background: '#FAFDFB' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: '#444' }}>
-                    <span>நகை எடை (Weight):</span>
-                    <span style={{ fontWeight: 600 }}>{service.weight ? `${service.weight.toFixed(3)} g` : '-'}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: '#444' }}>
-                    <span>சேவை கட்டணம் (Fee):</span>
+                <div style={{ border: '1px solid #0F3D34', borderRadius: 4, padding: '6px 10px', background: '#FAFDFB' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <span>சேவை கட்டணம்:</span>
                     <span style={{ fontWeight: 600 }}>Rs.{service.amount?.toLocaleString('en-IN')}</span>
                   </div>
                   {(parseFloat(oldSilverAmount) || 0) > 0 && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: '#c00', fontWeight: 700 }}>
-                      <span>பழைய வெள்ளி கழிப்பு (Less Old Silver {oldSilverWeight ? `[${oldSilverWeight}g]` : ''}):</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, color: '#c00', fontWeight: 700 }}>
+                      <span>பழைய வெள்ளி கழிப்பு:</span>
                       <span>-Rs.{parseFloat(oldSilverAmount).toLocaleString('en-IN')}</span>
                     </div>
                   )}
                   <div
-                    className="total-footer"
                     style={{
                       borderTop: '1.5px solid #0F3D34',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       background: '#EAEFEA',
-                      WebkitPrintColorAdjust: 'exact',
-                      printColorAdjust: 'exact',
-                      margin: '0 -12px -8px -12px',
-                      padding: '8px 12px',
-                      borderRadius: '0 0 4px 4px'
+                      margin: '0 -10px -6px -10px',
+                      padding: '6px 10px',
+                      borderRadius: '0 0 3px 3px'
                     }}
                   >
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#0F3D34' }}>மொத்த கட்டணம் (Net Fee):</span>
-                    <span style={{ fontSize: '16px', fontWeight: 800, color: '#0F3D34', fontFamily: 'Outfit, sans-serif' }}>
-                      Rs.{netServiceFee.toLocaleString('en-IN')}
-                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#0F3D34' }}>மொத்த கட்டணம்:</span>
+                    <span style={{ fontSize: '15px', fontWeight: 800, color: '#0F3D34' }}>Rs.{netServiceFee.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Thank You */}
-              <div style={{ textAlign: 'center', margin: '16px 0 24px 0' }}>
-                <div style={{ fontSize: '18px', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontWeight: 700, color: '#0F3D34' }}>
-                  Thank You
+              {/* Signatures */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, paddingTop: 8, borderTop: '1px dashed #ccc', fontSize: '9px', color: '#333' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ height: 18 }} />
+                  <div>வாடிக்கையாளர் கையொப்பம்</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ height: 18 }} />
+                  <div>ஈகிள் சில்வர்ஸ் (Authorized Signatory)</div>
                 </div>
               </div>
 
-              {/* 2 Separated Signatures */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '0 20px', marginTop: 20 }}>
-                <div style={{ width: '150px', textAlign: 'center', borderTop: '1px solid #555', paddingTop: 5 }}>
-                  <span style={{ fontSize: '10px', color: '#333', fontWeight: 600 }}>Customer Signature</span>
-                </div>
-                <div style={{ width: '150px', textAlign: 'center', borderTop: '1px solid #555', paddingTop: 5 }}>
-                  <span style={{ fontSize: '10px', color: '#333', fontWeight: 600 }}>Authorized Signatory</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -437,23 +401,28 @@ const ServiceLog = ({ serviceEntries = [], onAddService, onDeleteService }) => {
   )
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <div className="flex-between mb-16">
         <div>
-          <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>சேவை பதிவேடு (Service Log)</h2>
-          <p className="text-sub">Polish & Repair Service Log — Eagle Silvers Wholesale</p>
+          <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
+            சேவை பதிவேடு (Service Log)
+          </h2>
+          <p className="text-sub">Jewellery Polish, Repair &amp; Cleaning Service Register</p>
         </div>
       </div>
 
       {success && (
-        <div className="toast-success mb-14">
-          <CheckCircle size={18} /> சேவை பதிவு வெற்றிகரமாக சேமிக்கப்பட்டது!
+        <div className="toast-success mb-14" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: 'rgba(16,185,129,0.15)', color: '#10B981', border: '1px solid #10B981', borderRadius: 10 }}>
+          <CheckCircle size={18} /> <span>சேவை பதிவு வெற்றிகரமாக சேமிக்கப்பட்டது! (Service logged successfully!)</span>
         </div>
       )}
 
-      <div className="layout-split-grid">
-        <div className="card">
-          <div className="card-title">புதிய சேவை பதிவு (New Service Entry)</div>
+      <div className="layout-split-grid" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 20, alignItems: 'start' }}>
+        {/* Left Form */}
+        <div className="card" style={{ padding: '20px 22px' }}>
+          <div className="card-title" style={{ fontSize: '15px', marginBottom: 14 }}>
+            1. புதிய சேவை பதிவு (New Service Entry)
+          </div>
           <form onSubmit={handleSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div className="form-group">
@@ -466,10 +435,10 @@ const ServiceLog = ({ serviceEntries = [], onAddService, onDeleteService }) => {
                 />
               </div>
               <div className="form-group">
-                <label>செல் (Mobile No)</label>
+                <label>தொலைபேசி (Mobile No)</label>
                 <input
                   type="tel"
-                  placeholder="9876543210"
+                  placeholder="98765 43210"
                   value={mobile}
                   onChange={e => setMobile(e.target.value)}
                 />
@@ -478,12 +447,12 @@ const ServiceLog = ({ serviceEntries = [], onAddService, onDeleteService }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div className="form-group">
-                <label>தேதி (Date) *</label>
+                <label>சேவை தேதி (Date) *</label>
                 <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
               </div>
               <div className="form-group">
-                <label>பொருள் (Item Name) *</label>
-                <input type="text" placeholder="எ.கா. தங்க வளையல்..." value={itemName} onChange={e => setItemName(e.target.value)} required />
+                <label>பொருள் பெயர் (Item Name) *</label>
+                <input type="text" placeholder="எ.கா. வெள்ளி கொலுசு..." value={itemName} onChange={e => setItemName(e.target.value)} required />
               </div>
             </div>
 
@@ -500,83 +469,136 @@ const ServiceLog = ({ serviceEntries = [], onAddService, onDeleteService }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div className="form-group">
-                <label>எடை — g</label>
+                <label>எடை (Weight in g)</label>
                 <input type="number" step="0.001" placeholder="0.000" value={weight} onChange={e => setWeight(e.target.value)} />
               </div>
               <div className="form-group">
-                <label>தொகை (Rs.) *</label>
+                <label>கட்டணம் (Service Fee ₹) *</label>
                 <input type="number" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} required />
               </div>
             </div>
 
             <div className="form-group" style={{ marginBottom: 16 }}>
               <label>கூடுதல் குறிப்பு (Note / Detail)</label>
-              <input type="text" placeholder="கூடுதல் விவரம்..." value={notes} onChange={e => setNotes(e.target.value)} />
+              <input type="text" placeholder="குறிப்புகள்..." value={notes} onChange={e => setNotes(e.target.value)} />
             </div>
 
-            <button type="submit" className="btn btn-gold btn-full btn-lg" disabled={loading}>
-              <Plus size={16} /> {loading ? 'சேமிக்கப்படுகிறது...' : '+ சேவை சேர் (Save Entry)'}
+            <button type="submit" className="btn btn-gold btn-full btn-lg" disabled={loading} style={{ height: '46px', fontSize: '15px', fontWeight: 800 }}>
+              <Plus size={16} /> {loading ? 'சேமிக்கப்படுகிறது...' : '+ சேவை பதிவேட்டில் சேர் (Save Entry)'}
             </button>
           </form>
         </div>
 
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 18px 10px', borderBottom: '1px solid var(--border)', display: 'flex', justify: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
-              சேவை வரலாறு (Service History)
+        {/* Right Service History List */}
+        <div className="card" style={{ padding: '20px 22px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div className="card-title" style={{ fontSize: '15px', margin: 0 }}>
+              2. சேவை வரலாறு (Service Records)
             </div>
             <span className="badge badge-blue">{filtered.length} பதிவுகள்</span>
           </div>
-          <div style={{ padding: '10px 14px', position: 'relative' }}>
-            <Search size={15} style={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
-            <input type="text" placeholder="பொருள், பெயர் அல்லது மொபைல் தேட..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 34, height: 36 }} />
+
+          <div style={{ position: 'relative', marginBottom: 12 }}>
+            <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
+            <input
+              type="text"
+              placeholder="தேடுக (பொருள், பெயர், எண்)..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ paddingLeft: 34, height: 36, fontSize: '13px' }}
+            />
           </div>
-          <div className="table-wrap" style={{ maxHeight: '380px', overflowY: 'auto' }}>
-            <table style={{ minWidth: '560px' }}>
-              <thead>
-                <tr>
-                  <th style={{ minWidth: '90px', textAlign: 'left' }}>தேதி (DATE)</th>
-                  <th style={{ minWidth: '160px', textAlign: 'left' }}>பொருள் / வாடிக்கையாளர்</th>
-                  <th style={{ minWidth: '120px', textAlign: 'left' }}>சேவை (SERVICE)</th>
-                  <th style={{ minWidth: '90px', textAlign: 'right' }}>தொகை</th>
-                  <th style={{ width: '50px', textAlign: 'center' }}>செயல்</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((s, idx) => (
-                  <tr key={s.id || idx}>
-                    <td style={{ fontSize: 11, color: 'var(--text-sub)' }}>{s.date}</td>
-                    <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      <div className="fw-600" style={{ color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.itemName}</div>
-                      <div style={{ fontSize: 10, color: 'var(--text-sub)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {s.customerName || 'Walk-in'} {s.mobile ? `(${s.mobile})` : ''} {s.notes ? `• ${s.notes}` : ''}
-                      </div>
-                    </td>
-                    <td><span className="badge badge-blue">{s.serviceType?.split(' ')[0]}</span></td>
-                    <td style={{ textAlign: 'right' }} className="fw-700 text-gold">Rs.{s.amount?.toLocaleString('en-IN')}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: 4 }}>
-                        <button className="btn btn-ghost" onClick={() => setPrintService(s)} title="சேவை ரசீது அச்சிடு" style={{ padding: '2px 6px', height: 26, fontSize: 11 }}>
-                          <Printer size={12} />
-                        </button>
-                        <button className="btn-danger-ghost" onClick={() => onDeleteService && onDeleteService(s.id)} title="நீக்கு" style={{ padding: '2px 6px', height: 26 }}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filtered.length === 0 && (
+
+          {/* Desktop Table View */}
+          <div className="desktop-table-view">
+            <div className="table-wrap" style={{ maxHeight: '380px', overflowY: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '460px' }}>
+                <thead>
                   <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: 36, color: 'var(--text-sub)' }}>
-                      <div style={{ marginBottom: 6 }}><Wrench size={28} opacity={0.3} /></div>
-                      <div>சேவை பதிவுகள் இல்லை</div>
-                    </td>
+                    <th style={{ width: '75px', textAlign: 'left' }}>தேதி</th>
+                    <th style={{ textAlign: 'left' }}>பொருள் / பெயர்</th>
+                    <th style={{ width: '90px', textAlign: 'center' }}>சேவை</th>
+                    <th style={{ width: '80px', textAlign: 'right' }}>கட்டணம்</th>
+                    <th style={{ width: '60px', textAlign: 'center' }}></th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filtered.map((s, idx) => (
+                    <tr key={s.id || idx}>
+                      <td style={{ fontSize: 11.5, color: 'var(--text-sub)' }}>{s.date}</td>
+                      <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div className="fw-600" style={{ color: 'var(--text-main)', fontSize: '13px' }}>{s.itemName}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-sub)' }}>
+                          {s.customerName || 'Walk-in'} {s.weight ? `• ${s.weight}g` : ''}
+                        </div>
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <span className="badge badge-blue" style={{ fontSize: '10.5px' }}>{s.serviceType?.split(' ')[0]}</span>
+                      </td>
+                      <td style={{ textAlign: 'right' }} className="fw-700 text-gold">
+                        ₹{s.amount?.toLocaleString('en-IN')}
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 4 }}>
+                          <button className="btn btn-ghost" onClick={() => setPrintService(s)} title="அச்சிடு" style={{ padding: '3px 6px', height: 26 }}>
+                            <Printer size={13} />
+                          </button>
+                          <button className="btn-danger-ghost" onClick={() => onDeleteService && onDeleteService(s.id)} title="நீக்கு" style={{ padding: '3px 6px', height: 26 }}>
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: 'center', padding: 36, color: 'var(--text-sub)' }}>
+                        <div style={{ marginBottom: 6 }}><Wrench size={24} opacity={0.3} /></div>
+                        <div>சேவை பதிவுகள் எதுவும் இல்லை</div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* Mobile Card View */}
+          <div className="mobile-card-list">
+            {filtered.map((s, idx) => (
+              <div key={s.id || idx} className="mobile-item-card" style={{ padding: '10px 12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <div className="fw-700" style={{ fontSize: '14px', color: 'var(--text-main)' }}>{s.itemName}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-sub)' }}>{s.date}</div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-sub)' }}>
+                    👤 {s.customerName || 'Walk-in'} {s.weight ? `• ${s.weight}g` : ''}
+                  </div>
+                  <span className="badge badge-blue" style={{ fontSize: '10px' }}>{s.serviceType?.split(' ')[0]}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px dashed var(--border)', paddingTop: 6 }}>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#1A3D63' }}>
+                    ₹{s.amount?.toLocaleString('en-IN')}
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button className="btn btn-ghost" onClick={() => setPrintService(s)} style={{ padding: '3px 8px', height: 26, fontSize: '11px' }}>
+                      <Printer size={12} /> பில்
+                    </button>
+                    <button className="btn-danger-ghost" onClick={() => onDeleteService && onDeleteService(s.id)} style={{ padding: '3px 8px', height: 26, fontSize: '11px' }}>
+                      <Trash2 size={12} /> நீக்கு
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {filtered.length === 0 && (
+              <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-sub)' }}>
+                சேவை பதிவுகள் எதுவும் இல்லை
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
