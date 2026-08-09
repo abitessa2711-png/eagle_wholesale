@@ -229,10 +229,17 @@ export default function App() {
         const prod = updatedProducts[pIdx]
         const soldQty = item.quantity
         const soldWeight = item.totalWeight || 0
-        const newQty = Math.max(0, prod.quantity - soldQty)
         
         const currentTotalWeight = prod.weight || 0
         const newTotalWeight = Math.max(0, currentTotalWeight - soldWeight)
+        
+        // For Kodi (கொடி): 1 Piece roll stays 1 Piece as long as weight > 0 (e.g. 500g -> sold 300g -> 200g left = 1 pc). Only becomes 0 when total weight is 0!
+        let newQty
+        if (prod.category === 'கொடி') {
+          newQty = newTotalWeight > 0.001 ? 1 : 0
+        } else {
+          newQty = Math.max(0, prod.quantity - soldQty)
+        }
         
         updatedProducts[pIdx] = {
           ...prod,

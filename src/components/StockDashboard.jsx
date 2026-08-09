@@ -19,8 +19,7 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
   })
 
   // Total Statistics
-  const totalStockQty = products.filter(p => p.category !== 'கொடி').reduce((sum, p) => sum + (p.quantity || 0), 0)
-  const totalStockRolls = products.filter(p => p.category === 'கொடி').length
+  const totalStockQty = products.reduce((sum, p) => sum + (p.quantity || 0), 0)
   const totalStockWeight = products.reduce((sum, p) => sum + (p.weight || 0), 0)
 
   return (
@@ -31,7 +30,7 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
             இருப்புப் பட்டியல் (Stock Inventory)
           </h2>
           <p className="text-sub">
-            மொத்த சரக்கு: <strong style={{ color: 'var(--text-main)' }}>{totalStockQty} pcs {totalStockRolls > 0 ? `+ ${totalStockRolls} ரோல்` : ''}</strong> | மொத்த எடை: <strong style={{ color: 'var(--text-main)' }}>{totalStockWeight.toFixed(3)}g</strong>
+            மொத்த சரக்கு: <strong style={{ color: 'var(--text-main)' }}>{totalStockQty} pcs</strong> | மொத்த எடை: <strong style={{ color: 'var(--text-main)' }}>{totalStockWeight.toFixed(3)}g</strong>
           </p>
         </div>
       </div>
@@ -82,8 +81,8 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
             <tbody>
               {filtered.map((p, idx) => {
                 const totalWt = p.weight || 0
-                const qty = p.quantity || 0
                 const isKodi = p.category === 'கொடி'
+                const displayQty = isKodi ? (totalWt > 0.001 ? 1 : 0) : (p.quantity || 0)
 
                 return (
                   <tr key={p.id || idx}>
@@ -95,10 +94,10 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
                     <td><span className="badge badge-blue">{p.category}</span></td>
                     <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.subcategory || '-'}</td>
                     <td style={{ textAlign: 'center' }}>
-                      <span className="text-gold fw-600">{isKodi ? '1 ரோல்' : `${qty} pcs`}</span>
+                      <span className="text-gold fw-600">{displayQty} pc{displayQty !== 1 ? 's' : ''}</span>
                     </td>
                     <td style={{ textAlign: 'right' }} className="fw-700 text-gold">
-                      {totalWt > 0 ? `${totalWt.toFixed(3)}g` : '-'}
+                      {totalWt > 0 ? `${totalWt.toFixed(3)}g` : '0.000g'}
                     </td>
                     {role === 'admin' && (
                       <td style={{ textAlign: 'center' }}>
@@ -127,8 +126,8 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
       <div className="mobile-card-list">
         {filtered.map((p, idx) => {
           const totalWt = p.weight || 0
-          const qty = p.quantity || 0
           const isKodi = p.category === 'கொடி'
+          const displayQty = isKodi ? (totalWt > 0.001 ? 1 : 0) : (p.quantity || 0)
 
           return (
             <div key={p.id || idx} className="mobile-item-card">
@@ -160,12 +159,12 @@ const StockDashboard = ({ products = [], onDelete, role = 'admin' }) => {
               {/* 2-Metric Highlight */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, background: 'rgba(26, 61, 99, 0.05)', padding: '8px 10px', borderRadius: 8 }}>
                 <div>
-                  <div style={{ fontSize: '10.5px', color: 'var(--text-sub)' }}>அளவு (Stock Format)</div>
-                  <div className="fw-700" style={{ fontSize: '13px', color: 'var(--text-main)' }}>{isKodi ? '🌀 1 ரோல்' : `${qty} pcs`}</div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--text-sub)' }}>அளவு (Stock Qty)</div>
+                  <div className="fw-700" style={{ fontSize: '13px', color: 'var(--text-main)' }}>{displayQty} pc{displayQty !== 1 ? 's' : ''}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '10.5px', color: 'var(--text-sub)' }}>மொத்த எடை (Weight)</div>
-                  <div className="fw-700 text-gold" style={{ fontSize: '13px' }}>{totalWt > 0 ? `${totalWt.toFixed(3)}g` : '-'}</div>
+                  <div className="fw-700 text-gold" style={{ fontSize: '13px' }}>{totalWt > 0 ? `${totalWt.toFixed(3)}g` : '0.000g'}</div>
                 </div>
               </div>
             </div>
