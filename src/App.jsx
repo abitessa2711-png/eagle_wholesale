@@ -20,44 +20,44 @@ export default function App() {
   const [activeTab, setActiveTab]       = useState('dashboard')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  // ── Standalone State (Browser localStorage + Supabase Sync) ───────────────
+  // ── Standalone State (Fresh Clean Client Database) ─────────────────────────
   const [products, setProducts]   = useState(() => {
     try {
-      const saved = localStorage.getItem('eagle_products_v3')
-      return saved ? JSON.parse(saved) : INITIAL_PRODUCTS
-    } catch {
-      return INITIAL_PRODUCTS
-    }
-  })
-
-  const [soldItems, setSoldItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem('eagle_sales_v3')
-      return saved ? JSON.parse(saved) : INITIAL_SALES
-    } catch {
-      return INITIAL_SALES
-    }
-  })
-
-  const [buybacks, setBuybacks]   = useState(() => {
-    try {
-      const saved = localStorage.getItem('eagle_buybacks_v3')
-      return saved ? JSON.parse(saved) : INITIAL_BUYBACKS
-    } catch {
-      return INITIAL_BUYBACKS
-    }
-  })
-
-  const [serviceEntries, setServiceEntries] = useState(() => {
-    try {
-      const saved = localStorage.getItem('eagle_services_v3')
+      const saved = localStorage.getItem('eagle_wholesale_client_v1_products')
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
     }
   })
 
-  // Initial Supabase Sync on load
+  const [soldItems, setSoldItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('eagle_wholesale_client_v1_sales')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  const [buybacks, setBuybacks]   = useState(() => {
+    try {
+      const saved = localStorage.getItem('eagle_wholesale_client_v1_buybacks')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  const [serviceEntries, setServiceEntries] = useState(() => {
+    try {
+      const saved = localStorage.getItem('eagle_wholesale_client_v1_services')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  // Initial Supabase Sync on load (if configured)
   useEffect(() => {
     async function loadSupabaseData() {
       const dbProducts = await fetchSupabaseData('products')
@@ -77,23 +77,37 @@ export default function App() {
 
   // Save changes locally
   useEffect(() => {
-    localStorage.setItem('eagle_products_v3', JSON.stringify(products))
+    localStorage.setItem('eagle_wholesale_client_v1_products', JSON.stringify(products))
   }, [products])
 
   useEffect(() => {
-    localStorage.setItem('eagle_sales_v3', JSON.stringify(soldItems))
+    localStorage.setItem('eagle_wholesale_client_v1_sales', JSON.stringify(soldItems))
   }, [soldItems])
 
   useEffect(() => {
-    localStorage.setItem('eagle_buybacks_v3', JSON.stringify(buybacks))
+    localStorage.setItem('eagle_wholesale_client_v1_buybacks', JSON.stringify(buybacks))
   }, [buybacks])
 
   useEffect(() => {
-    localStorage.setItem('eagle_services_v3', JSON.stringify(serviceEntries))
+    localStorage.setItem('eagle_wholesale_client_v1_services', JSON.stringify(serviceEntries))
   }, [serviceEntries])
 
   const handleLogout = () => {
     setUser(null)
+  }
+
+  const handleResetAllData = () => {
+    if (confirm('அனைத்து டெமோ/டெஸ்ட் பதிவுகளையும் நீக்கி புதிய நிலைக்கு ரீசெட் செய்ய விரும்புகிறீர்களா? (Clear all data for clean client launch?)')) {
+      localStorage.removeItem('eagle_wholesale_client_v1_products')
+      localStorage.removeItem('eagle_wholesale_client_v1_sales')
+      localStorage.removeItem('eagle_wholesale_client_v1_buybacks')
+      localStorage.removeItem('eagle_wholesale_client_v1_services')
+      setProducts([])
+      setSoldItems([])
+      setBuybacks([])
+      setServiceEntries([])
+      alert('அனைத்து பதிவுகளும் முழுமையாக நீக்கப்பட்டுவிட்டன! (All data cleared successfully)')
+    }
   }
 
   // ── Stock Add (Wholesale Total Batch Weight) ──────────────────────────────
@@ -258,6 +272,7 @@ export default function App() {
         <Header
           username={user?.name || 'Admin'}
           onLogout={handleLogout}
+          onResetAllData={handleResetAllData}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
         <main className="container animate-fade-in">

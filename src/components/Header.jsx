@@ -1,8 +1,8 @@
 import React from 'react'
-import { Menu, LogOut } from 'lucide-react'
+import { Menu, LogOut, RotateCcw } from 'lucide-react'
 import EagleLogo from './EagleLogo'
 
-const Header = ({ username = 'Admin', onLogout, onMenuClick }) => {
+const Header = ({ username = 'Admin', onLogout, onResetAllData, onMenuClick }) => {
   return (
     <header className="app-header">
       <div className="flex" style={{ gap: 10, alignItems: 'center' }}>
@@ -25,7 +25,20 @@ const Header = ({ username = 'Admin', onLogout, onMenuClick }) => {
         </div>
       </div>
 
-      <div className="header-actions">
+      <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Clear / Reset All Data for Fresh Client Launch */}
+        {onResetAllData && (
+          <button
+            className="btn btn-ghost hidden-mobile"
+            onClick={onResetAllData}
+            title="அனைத்து டெஸ்ட் பதிவுகளையும் நீக்கு (Clear Demo Data)"
+            style={{ fontSize: '11.5px', color: 'var(--text-sub)', padding: '5px 10px', height: '34px', gap: 4 }}
+          >
+            <RotateCcw size={13} />
+            <span>டேட்டா ரீசெட்</span>
+          </button>
+        )}
+
         <div className="user-chip">
           <div className="user-avatar">
             {(username || 'A').charAt(0).toUpperCase()}
