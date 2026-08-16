@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import EagleLogo from './EagleLogo'
 
 const Login = ({ onLogin, onShowSignup }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = (e) => {
@@ -152,7 +154,11 @@ const Login = ({ onLogin, onShowSignup }) => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
+        <form onSubmit={handleSubmit} style={{ textAlign: 'left' }} autoComplete="off">
+          {/* Dummy hidden inputs to block aggressive browser autofill */}
+          <input type="text" style={{ display: 'none' }} tabIndex="-1" readOnly />
+          <input type="password" style={{ display: 'none' }} tabIndex="-1" readOnly />
+
           <div style={{ marginBottom: '18px' }}>
             <label style={{
               display: 'block',
@@ -165,9 +171,15 @@ const Login = ({ onLogin, onShowSignup }) => {
             </label>
             <input
               type="email"
+              name="eagle_login_user_id"
+              id="eagle_login_user_id"
               placeholder="admin@eagle.com"
               value={email}
               onChange={e => { setEmail(e.target.value); setError(''); }}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck="false"
               required
               style={{
                 width: '100%',
@@ -180,7 +192,8 @@ const Login = ({ onLogin, onShowSignup }) => {
                 fontSize: '14px',
                 fontFamily: "'Inter', sans-serif",
                 outline: 'none',
-                transition: 'border-color 0.2s, box-shadow 0.2s'
+                transition: 'border-color 0.2s, box-shadow 0.2s',
+                boxSizing: 'border-box'
               }}
               onFocus={e => { e.target.style.borderColor = '#B3CFE5'; e.target.style.boxShadow = '0 0 0 3px rgba(74, 127, 167, 0.35)'; }}
               onBlur={e => { e.target.style.borderColor = 'rgba(179, 207, 229, 0.22)'; e.target.style.boxShadow = 'none'; }}
@@ -197,28 +210,53 @@ const Login = ({ onLogin, onShowSignup }) => {
             }}>
               கடவுச்சொல் (Password)
             </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={e => { setPassword(e.target.value); setError(''); }}
-              required
-              style={{
-                width: '100%',
-                height: '46px',
-                padding: '0 16px',
-                borderRadius: '12px',
-                border: '1px solid rgba(179, 207, 229, 0.22)',
-                background: 'rgba(26, 61, 99, 0.55)',
-                color: '#F6FAFD',
-                fontSize: '14px',
-                fontFamily: "'Inter', sans-serif",
-                outline: 'none',
-                transition: 'border-color 0.2s, box-shadow 0.2s'
-              }}
-              onFocus={e => { e.target.style.borderColor = '#B3CFE5'; e.target.style.boxShadow = '0 0 0 3px rgba(74, 127, 167, 0.35)'; }}
-              onBlur={e => { e.target.style.borderColor = 'rgba(179, 207, 229, 0.22)'; e.target.style.boxShadow = 'none'; }}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="eagle_login_secret_code"
+                id="eagle_login_secret_code"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => { setPassword(e.target.value); setError(''); }}
+                autoComplete="new-password"
+                required
+                style={{
+                  width: '100%',
+                  height: '46px',
+                  padding: '0 44px 0 16px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(179, 207, 229, 0.22)',
+                  background: 'rgba(26, 61, 99, 0.55)',
+                  color: '#F6FAFD',
+                  fontSize: '14px',
+                  fontFamily: "'Inter', sans-serif",
+                  outline: 'none',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={e => { e.target.style.borderColor = '#B3CFE5'; e.target.style.boxShadow = '0 0 0 3px rgba(74, 127, 167, 0.35)'; }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(179, 207, 229, 0.22)'; e.target.style.boxShadow = 'none'; }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'rgba(179, 207, 229, 0.7)',
+                  cursor: 'pointer',
+                  padding: 4,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" style={{

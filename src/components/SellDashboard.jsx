@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ShoppingBag, Plus, Trash2, AlertTriangle, Printer, Search } from 'lucide-react'
 import BillModal from './BillModal'
 
@@ -7,11 +7,15 @@ const SellDashboard = ({ products = [], processSale }) => {
   const [mobile, setMobile]             = useState('')
   const [goldRate, setGoldRate]         = useState('')
   const [silverRate, setSilverRate]     = useState('')
-  const [oldGoldWeight, setOldGoldWeight] = useState('')
   const [oldGoldAmount, setOldGoldAmount] = useState('')
-  const [oldSilverWeight, setOldSilverWeight] = useState('')
   const [oldSilverAmount, setOldSilverAmount] = useState('')
   const [cart, setCart]                 = useState([])
+  
+  // Step-by-step Category / Subcategory / Variant / Detail Filters (like AddStock)
+  const [filterCat, setFilterCat]       = useState('')
+  const [filterSubcat, setFilterSubcat] = useState('')
+  const [filterVariant, setFilterVariant] = useState('')
+  const [filterDetail, setFilterDetail] = useState('')
   
   const [weightFilter, setWeightFilter] = useState('')
   const [selectedProductId, setSelectedProductId] = useState('')
@@ -23,8 +27,42 @@ const SellDashboard = ({ products = [], processSale }) => {
   const [loading, setLoading]           = useState(false)
   const [error, setError]               = useState('')
 
+  // In-stock products with remaining weight > 0
+  const availableStock = products.filter(p => (p.weight || 0) > 0.001)
+
+  // Cascading Dropdown Options from current Stock
+  const availableCats = [...new Set(availableStock.map(p => p.category).filter(Boolean))]
+
+  const availableSubcats = filterCat
+    ? [...new Set(availableStock.filter(p => p.category === filterCat).map(p => p.subcategory).filter(Boolean))]
+    : []
+
+  const availableVariants = filterCat
+    ? [...new Set(availableStock.filter(p => p.category === filterCat && (!filterSubcat || p.subcategory === filterSubcat)).map(p => p.variant).filter(Boolean))]
+    : []
+
+  const availableDetails = (filterCat && filterVariant)
+    ? [...new Set(availableStock.filter(p => p.category === filterCat && (!filterSubcat || p.subcategory === filterSubcat) && p.variant === filterVariant).map(p => p.detail).filter(Boolean))]
+    : []
+
+  // When step-by-step filters change, auto-match product
+  useEffect(() => {
+    if (filterCat && filterVariant) {
+      const match = availableStock.find(p => 
+        p.category === filterCat &&
+        (!filterSubcat || p.subcategory === filterSubcat) &&
+        p.variant === filterVariant &&
+        (!filterDetail || p.detail === filterDetail)
+      )
+      if (match) {
+        setSelectedProductId(match.id)
+      } else {
+        setSelectedProductId('')
+      }
+    }
+  }, [filterCat, filterSubcat, filterVariant, filterDetail, products])
+
   const selectedProd = products.find(p => String(p.id) === String(selectedProductId))
-  const isKodi = selectedProd?.category === 'கொடி'
 
   const existingCartQty = selectedProd
     ? cart.filter(i => String(i.productId) === String(selectedProd.id)).reduce((s, i) => s + (i.quantity || 0), 0)
@@ -35,20 +73,25 @@ const SellDashboard = ({ products = [], processSale }) => {
     : 0
 
   const availWeight = selectedProd ? Math.max(0, (selectedProd.weight || 0) - existingCartWeight) : 0
-  const availQty = selectedProd 
-    ? (isKodi ? (availWeight > 0.001 ? 1 : 0) : Math.max(0, selectedProd.quantity - existingCartQty))
-    : 0
+  const availQty = selectedProd ? Math.max(0, (selectedProd.quantity || 1) - existingCartQty) : 0
 
   const parsedQty = parseInt(sellQty) || 0
   const parsedWeight = parseFloat(sellWeight) || 0
 
-  const isQtyOver = !isKodi && selectedProd && parsedQty > availQty
+  const isQtyOver = selectedProd && parsedQty > availQty
   const isWeightOver = selectedProd && parsedWeight > (availWeight + 0.0001)
 
   const handleProductChange = (prodId) => {
     setSelectedProductId(prodId)
+    const p = products.find(i => String(i.id) === String(prodId))
+    if (p) {
+      setFilterCat(p.category || '')
+      setFilterSubcat(p.subcategory || '')
+      setFilterVariant(p.variant || '')
+      setFilterDetail(p.detail || '')
+    }
     setError('')
-    setSellWeight('') // Strictly manual typing
+    setSellWeight('')
   }
 
   const handleQtyChange = (qtyVal) => {
@@ -57,10 +100,8 @@ const SellDashboard = ({ products = [], processSale }) => {
   }
 
   // Weight & Name Matching Search Filter
-  const searchMatchedProducts = products.filter(p => {
-    if ((p.weight || 0) <= 0.001) return false
+  const searchMatchedProducts = availableStock.filter(p => {
     if (!weightFilter.trim()) return true
-
     const term = weightFilter.trim().toLowerCase()
     const matchName = p.variant?.toLowerCase().includes(term) ||
                       p.category?.toLowerCase().includes(term) ||
@@ -69,35 +110,32 @@ const SellDashboard = ({ products = [], processSale }) => {
     
     const weightStr = (p.weight || 0).toString()
     const matchWeight = weightStr.includes(term) || (p.variant && p.variant.toLowerCase().includes(term))
-
     return matchName || matchWeight
   })
 
   const addToCart = () => {
-    if (!selectedProductId) {
-      setError('தயவுசெய்து பொருளைத் தேர்ந்தெடுக்கவும் (Please select product)')
+    if (!selectedProductId || !selectedProd) {
+      setError('தயவுசெய்து பொருளைத் தேர்ந்தெடுக்கவும் (Please select product via filters or search)')
       return
     }
 
-    if (!selectedProd) return
-
-    const qty = isKodi ? 1 : (parseInt(sellQty) || 1)
+    const qty = parseInt(sellQty) || 1
     const weightVal = parseFloat(sellWeight) || 0
     const gross = parseFloat(grossAmount) || 0
     const disc = parseFloat(discount) || 0
 
-    if (!isKodi && qty <= 0) {
+    if (qty <= 0) {
       setError('தயவுசெய்து சரியான எண்ணிக்கையை உள்ளிடவும் (Enter valid quantity)')
       return
     }
 
-    if (!isKodi && qty > availQty) {
+    if (qty > availQty) {
       setError(`இருப்பில் போதுமான எண்ணிக்கை இல்லை! (இருப்பில்: ${availQty} pcs மட்டுமே)`)
       return
     }
 
     if (weightVal <= 0) {
-      setError('தயவுசெய்து விற்பனை எடையை (Sale / Cut Weight in g) உள்ளிடவும்')
+      setError('தயவுசெய்து விற்பனை எடையை (Sale Weight in g) உள்ளிடவும்')
       return
     }
 
@@ -116,7 +154,6 @@ const SellDashboard = ({ products = [], processSale }) => {
       subcategory: selectedProd.subcategory,
       variant: selectedProd.variant,
       detail: selectedProd.detail,
-      isKodi: isKodi,
       unitWeight: weightVal / Math.max(1, qty),
       totalWeight: weightVal,
       quantity: qty,
@@ -127,6 +164,10 @@ const SellDashboard = ({ products = [], processSale }) => {
 
     setCart(prev => [...prev, cartItem])
     setSelectedProductId('')
+    setFilterCat('')
+    setFilterSubcat('')
+    setFilterVariant('')
+    setFilterDetail('')
     setSellQty('1')
     setSellWeight('')
     setGrossAmount('')
@@ -144,17 +185,29 @@ const SellDashboard = ({ products = [], processSale }) => {
     setError('')
 
     try {
-      const billData = await processSale(customerName, mobile, cart, goldRate, silverRate, oldSilverAmount, oldSilverWeight, oldGoldAmount, oldGoldWeight)
+      const billData = await processSale(
+        customerName,
+        mobile,
+        cart,
+        goldRate,
+        silverRate,
+        oldSilverAmount,
+        '', // oldSilverWeight removed
+        oldGoldAmount,
+        ''  // oldGoldWeight removed
+      )
       setCompletedBill(billData)
       setCart([])
       setCustomerName('')
       setMobile('')
       setGoldRate('')
       setSilverRate('')
-      setOldGoldWeight('')
       setOldGoldAmount('')
-      setOldSilverWeight('')
       setOldSilverAmount('')
+      setFilterCat('')
+      setFilterSubcat('')
+      setFilterVariant('')
+      setFilterDetail('')
       setWeightFilter('')
     } catch (err) {
       setError(err.message || 'விற்பனை செயலாக்கத்தில் பிழை')
@@ -175,7 +228,7 @@ const SellDashboard = ({ products = [], processSale }) => {
           <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-main)', fontFamily: 'Outfit, sans-serif' }}>
             விற்பனை &amp; பில்லிங் (Sales &amp; POS)
           </h2>
-          <p className="text-sub">Wholesale Billing, Metal Deductions &amp; Real-time Stock Deduction</p>
+          <p className="text-sub">Wholesale Billing, Category-Wise Stock Filtering &amp; Real-time Deductions</p>
         </div>
       </div>
 
@@ -215,7 +268,7 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          {/* Section 2: Today's Rates & Old Metals */}
+          {/* Section 2: Today's Rates & Old Metals Deductions (Weights Removed as requested) */}
           <div className="card-title" style={{ fontSize: '14.5px', marginBottom: 12, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
             2. இன்றைய விலை &amp; பழைய நகை கழிவு (Rates &amp; Deductions)
           </div>
@@ -241,17 +294,7 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
-            <div className="form-group">
-              <label>பழைய தங்கம் எடை (Old Gold Wt g)</label>
-              <input
-                type="number"
-                step="0.001"
-                placeholder="0.000"
-                value={oldGoldWeight}
-                onChange={e => setOldGoldWeight(e.target.value)}
-              />
-            </div>
+          <div className="responsive-grid-2" style={{ marginBottom: 14 }}>
             <div className="form-group">
               <label>பழைய தங்கம் கழிப்பு (Old Gold Less ₹)</label>
               <input
@@ -259,19 +302,6 @@ const SellDashboard = ({ products = [], processSale }) => {
                 placeholder="0"
                 value={oldGoldAmount}
                 onChange={e => setOldGoldAmount(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="responsive-grid-2" style={{ marginBottom: 14 }}>
-            <div className="form-group">
-              <label>பழைய வெள்ளி எடை (Old Silver Wt g)</label>
-              <input
-                type="number"
-                step="0.001"
-                placeholder="0.000"
-                value={oldSilverWeight}
-                onChange={e => setOldSilverWeight(e.target.value)}
               />
             </div>
             <div className="form-group">
@@ -285,19 +315,19 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
-          {/* Section 3: Product Selection & Weight Search */}
+          {/* Section 3: Step-by-Step Product Selection (Exact structure like Add Stock) */}
           <div className="card-title" style={{ fontSize: '14.5px', marginBottom: 12, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
             3. பொருள் சேர்த்தல் (Add Product to Bill)
           </div>
 
-          {/* Instant Weight & Name Search Filter */}
+          {/* Quick Search Bar */}
           <div className="form-group" style={{ marginBottom: 12 }}>
             <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Search size={14} /> எடை அல்லது பெயர் மூலம் தேடுக (Search by Weight g / Name)
+              <Search size={14} /> விரைவுத் தேடல் (Quick Search by Weight g / Name)
             </label>
             <input
               type="text"
-              placeholder="எ.கா. 1.5, 30, 600, கொலுசு, 1 inch 1.500g..."
+              placeholder="எ.கா. 1.5, 30, 600, கொலுசு, 10 inch..."
               value={weightFilter}
               onChange={e => setWeightFilter(e.target.value)}
               style={{ borderColor: weightFilter ? 'var(--gold)' : undefined, height: '38px', fontSize: '13px' }}
@@ -333,81 +363,137 @@ const SellDashboard = ({ products = [], processSale }) => {
                 >
                   <div>
                     <span style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text-main)' }}>{p.variant}</span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-sub)', marginLeft: 6 }}>({p.category})</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-sub)', marginLeft: 6 }}>({p.category} {p.detail ? `• ${p.detail}` : ''})</span>
                   </div>
                   <div style={{ textAlign: 'right', fontWeight: 700, color: 'var(--gold)', fontSize: '12.5px' }}>
-                    {p.category === 'கொடி' ? `1 pc | ${p.weight?.toFixed(3)}g` : `${p.quantity} pcs | ${p.weight?.toFixed(3)}g`}
+                    {p.quantity} pcs | {p.weight?.toFixed(3)}g
                   </div>
                 </div>
               ))}
               {searchMatchedProducts.length === 0 && (
                 <div style={{ fontSize: '12px', color: 'var(--text-sub)', textAlign: 'center', padding: 8 }}>
-                  பொருந்திய பொருட்கள் எதுவும் இல்லை
+                  பொருட்கள் எதுவும் இல்லை
                 </div>
               )}
             </div>
           )}
 
-          {/* Product Dropdown Select */}
-          <div className="form-group" style={{ marginBottom: 12 }}>
-            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-              <span>இருப்பில் உள்ள பொருள் (Select Product) *</span>
-              {selectedProd && (
-                <span style={{ fontSize: 11, fontWeight: 700, color: (availWeight <= 0) ? '#EF4444' : '#10B981' }}>
-                  {isKodi 
-                    ? `இருப்பு: 1 pc | ${availWeight.toFixed(3)}g (கொடி ரோல்)` 
-                    : `இருப்பு: ${availQty} pcs | ${availWeight.toFixed(3)}g`}
-                </span>
-              )}
-            </label>
-            <select
-              value={selectedProductId}
-              onChange={e => handleProductChange(e.target.value)}
-            >
-              <option value="">— பொருளைத் தேர்ந்தெடுக்கவும் —</option>
-              {searchMatchedProducts.map(p => {
-                const itemInCartWt = cart.filter(i => String(i.productId) === String(p.id)).reduce((s, i) => s + (i.totalWeight || 0), 0)
-                const itemInCartQty = cart.filter(i => String(i.productId) === String(p.id)).reduce((s, i) => s + (i.quantity || 0), 0)
-                const remQty = Math.max(0, p.quantity - itemInCartQty)
-                const remWt = Math.max(0, (p.weight || 0) - itemInCartWt)
-                const isK = p.category === 'கொடி'
-                return (
-                  <option key={p.id} value={p.id} disabled={remWt <= 0.001}>
-                    {p.variant} ({p.category}) — {isK ? `1 pc | ${remWt.toFixed(2)}g ரோல்` : `இருப்பு: ${remQty} pcs | ${remWt.toFixed(2)}g`}
-                  </option>
-                )
-              })}
-            </select>
+          {/* Step 1 & 2: Category & Subcategory Filter Dropdowns */}
+          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
+            <div className="form-group">
+              <label>1. முக்கியப் பிரிவு (Category) *</label>
+              <select
+                value={filterCat}
+                onChange={e => {
+                  setFilterCat(e.target.value)
+                  setFilterSubcat('')
+                  setFilterVariant('')
+                  setFilterDetail('')
+                  setSelectedProductId('')
+                  setError('')
+                }}
+              >
+                <option value="">— பிரிவு தேர்வு செய்க —</option>
+                {availableCats.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>2. துணைப் பிரிவு (Subcategory)</label>
+              <select
+                value={filterSubcat}
+                onChange={e => {
+                  setFilterSubcat(e.target.value)
+                  setFilterVariant('')
+                  setFilterDetail('')
+                  setSelectedProductId('')
+                }}
+                disabled={!filterCat || availableSubcats.length === 0}
+              >
+                <option value="">— அனைத்து துணைப்பிரிவுகள் —</option>
+                {availableSubcats.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
 
+          {/* Step 3 & 4: Variant & Detail Filter Dropdowns */}
           <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
-            {isKodi ? (
-              <div className="form-group">
-                <label>விற்பனை உருப்படி (Item)</label>
-                <input
-                  type="text"
-                  value="1 pc (கொடி ரோல் - எடை கட்)"
-                  disabled
-                  style={{ background: 'rgba(200, 169, 106, 0.08)', color: 'var(--gold)', fontWeight: 700 }}
-                />
-              </div>
-            ) : (
-              <div className="form-group">
-                <label>எண்ணிக்கை (Sale Qty pcs) *</label>
-                <input
-                  type="number"
-                  value={sellQty}
-                  onChange={e => handleQtyChange(e.target.value)}
-                  min="1"
-                  max={availQty || 1}
-                  style={{ borderColor: isQtyOver ? '#EF4444' : undefined }}
-                />
-              </div>
-            )}
+            <div className="form-group">
+              <label>3. மாடல் / அளவு (Variant / Size) *</label>
+              <select
+                value={filterVariant}
+                onChange={e => {
+                  setFilterVariant(e.target.value)
+                  setFilterDetail('')
+                  setError('')
+                }}
+                disabled={!filterCat || availableVariants.length === 0}
+              >
+                <option value="">— மாடல் / அளவு தேர்வு —</option>
+                {availableVariants.map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>4. கூடுதல் விபரம் / முத்து (Detail / Pearl)</label>
+              <select
+                value={filterDetail}
+                onChange={e => {
+                  setFilterDetail(e.target.value)
+                  setError('')
+                }}
+                disabled={!filterVariant || availableDetails.length === 0}
+              >
+                <option value="">— அனைத்து விபரங்கள் —</option>
+                {availableDetails.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Live Stock Status Banner */}
+          {selectedProd ? (
+            <div style={{
+              background: availWeight > 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+              border: `1px solid ${availWeight > 0 ? '#10B981' : '#EF4444'}`,
+              borderRadius: 8,
+              padding: '8px 12px',
+              marginBottom: 12,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 4
+            }}>
+              <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-main)' }}>
+                {selectedProd.variant} {selectedProd.detail ? `(${selectedProd.detail})` : ''}
+              </span>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: availWeight > 0 ? '#10B981' : '#EF4444' }}>
+                இருப்பு: {availQty} pcs | {availWeight.toFixed(3)}g
+              </span>
+            </div>
+          ) : filterCat && filterVariant ? (
+            <div style={{ fontSize: '12px', color: 'var(--gold)', marginBottom: 10 }}>
+              💡 விபரத்தை (Detail) தேர்வு செய்து அல்லது நேரடி பொருளைத் தேர்ந்தெடுக்கவும்.
+            </div>
+          ) : null}
+
+          {/* Step 5 & 6: Sale Quantity & Sale Weight */}
+          <div className="responsive-grid-2" style={{ marginBottom: 12 }}>
+            <div className="form-group">
+              <label>5. விற்பனை எண்ணிக்கை (Sale Qty pcs) *</label>
+              <input
+                type="number"
+                value={sellQty}
+                onChange={e => handleQtyChange(e.target.value)}
+                min="1"
+                max={availQty || 1}
+                style={{ borderColor: isQtyOver ? '#EF4444' : undefined }}
+              />
+            </div>
 
             <div className="form-group">
               <label style={{ color: isWeightOver ? '#EF4444' : undefined }}>
-                {isKodi ? 'கட் செய்து தரும் எடை (Cut Weight in g) *' : 'விற்பனை எடை (Sale Weight in g) *'}
+                6. விற்பனை எடை (Sale Weight in g) *
               </label>
               <input
                 type="number"
@@ -420,9 +506,10 @@ const SellDashboard = ({ products = [], processSale }) => {
             </div>
           </div>
 
+          {/* Step 7 & 8: Gross Amount & Discount */}
           <div className="responsive-grid-2" style={{ marginBottom: 14 }}>
             <div className="form-group">
-              <label>மொத்த விலை (Gross Amount ₹) *</label>
+              <label>7. மொத்த விலை (Gross Amount ₹) *</label>
               <input
                 type="number"
                 placeholder="எ.கா. 13500"
@@ -431,7 +518,7 @@ const SellDashboard = ({ products = [], processSale }) => {
               />
             </div>
             <div className="form-group">
-              <label>தள்ளுபடி (Discount ₹)</label>
+              <label>8. தள்ளுபடி (Discount ₹)</label>
               <input
                 type="number"
                 placeholder="0"
@@ -444,8 +531,8 @@ const SellDashboard = ({ products = [], processSale }) => {
           <button
             className="btn btn-gold btn-full btn-lg"
             onClick={addToCart}
-            disabled={isWeightOver || isQtyOver}
-            style={{ height: '44px', fontSize: '14.5px', fontWeight: 700, opacity: (isWeightOver || isQtyOver) ? 0.6 : 1, cursor: (isWeightOver || isQtyOver) ? 'not-allowed' : 'pointer' }}
+            disabled={!selectedProductId || isWeightOver || isQtyOver}
+            style={{ height: '44px', fontSize: '14.5px', fontWeight: 700, opacity: (!selectedProductId || isWeightOver || isQtyOver) ? 0.6 : 1, cursor: (!selectedProductId || isWeightOver || isQtyOver) ? 'not-allowed' : 'pointer' }}
           >
             <Plus size={18} /> + பட்டியலில் சேர் (Add Item to Bill)
           </button>
@@ -475,10 +562,12 @@ const SellDashboard = ({ products = [], processSale }) => {
                     <tr key={idx}>
                       <td style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         <div className="fw-600" style={{ color: 'var(--text-main)', fontSize: '13px' }}>{item.variant}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-sub)' }}>{item.category}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-sub)' }}>
+                          {item.category} {item.detail ? `• ${item.detail}` : ''}
+                        </div>
                       </td>
                       <td style={{ textAlign: 'center', fontWeight: 600 }}>
-                        {item.isKodi ? '1 pc' : `${item.quantity} pcs`}
+                        {item.quantity} pcs
                       </td>
                       <td style={{ textAlign: 'right', fontWeight: 600 }}>{item.totalWeight?.toFixed(3)}g</td>
                       <td style={{ textAlign: 'right' }} className="fw-700 text-gold">
@@ -524,14 +613,14 @@ const SellDashboard = ({ products = [], processSale }) => {
 
             {(parseFloat(oldGoldAmount) || 0) > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#EF4444', marginBottom: 5 }}>
-                <span>பழைய தங்கம் கழிப்பு (Old Gold {oldGoldWeight ? `[${oldGoldWeight}g]` : ''}):</span>
+                <span>பழைய தங்கம் கழிப்பு (Old Gold Less):</span>
                 <span className="fw-700">-₹{parseFloat(oldGoldAmount).toLocaleString('en-IN')}</span>
               </div>
             )}
 
             {(parseFloat(oldSilverAmount) || 0) > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#EF4444', marginBottom: 5 }}>
-                <span>பழைய வெள்ளி கழிப்பு (Old Silver {oldSilverWeight ? `[${oldSilverWeight}g]` : ''}):</span>
+                <span>பழைய வெள்ளி கழிப்பு (Old Silver Less):</span>
                 <span className="fw-700">-₹{parseFloat(oldSilverAmount).toLocaleString('en-IN')}</span>
               </div>
             )}
