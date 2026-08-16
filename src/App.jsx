@@ -119,26 +119,64 @@ export default function App() {
     setUser(null)
   }
 
-  // ── Stock Add ─────────────────────────────────────────────────────────────
+  // ── Stock Add (with Automatic Existing Product Merging) ───────────────────
   const addProduct = async (newProduct) => {
     const totalWeight = parseFloat(newProduct.weight || 0)
     const qty = parseInt(newProduct.quantity || 1)
+    const cat = (newProduct.category || '').trim()
+    const subcat = (newProduct.subcategory || '').trim()
+    const variant = (newProduct.variant || '').trim()
+    const detail = (newProduct.detail || '').trim()
 
-    const newEntry = {
-      id: String(Date.now()),
-      category: newProduct.category,
-      subcategory: newProduct.subcategory || '',
-      variant: newProduct.variant,
-      detail: newProduct.detail || '',
-      weight: totalWeight,
-      quantity: qty,
-      createdAt: newProduct.customDate || new Date().toISOString()
+    // Robust Detail Normalizer for matching variants
+    const normDetail = (str) => (str || '').trim()
+      .replace(/மூணு இடம்/g, 'மூன்று இடை')
+      .replace(/மூன்று இடம்/g, 'மூன்று இடை')
+      .replace(/ஒரு இடம்/g, 'ஒரு இடை')
+
+    // Find if identical product already exists in stock
+    const existingIndex = products.findIndex(p =>
+      (p.category || '').trim().toLowerCase() === cat.toLowerCase() &&
+      (p.subcategory || '').trim().toLowerCase() === subcat.toLowerCase() &&
+      (p.variant || '').trim().toLowerCase() === variant.toLowerCase() &&
+      normDetail(p.detail).toLowerCase() === normDetail(detail).toLowerCase()
+    )
+
+    if (existingIndex !== -1) {
+      // Merge with existing item (increase quantity and total batch weight)
+      const existing = products[existingIndex]
+      const updatedQty = (existing.quantity || 0) + qty
+      const updatedWeight = (existing.weight || 0) + totalWeight
+
+      const updatedProd = {
+        ...existing,
+        quantity: updatedQty,
+        weight: updatedWeight
+      }
+
+      const updated = [...products]
+      updated[existingIndex] = updatedProd
+      setProducts(updated)
+      localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updated))
+      await updateSupabaseRecord('products', existing.id, { quantity: updatedQty, weight: updatedWeight })
+    } else {
+      // New distinct product entry
+      const newEntry = {
+        id: String(Date.now()),
+        category: cat,
+        subcategory: subcat,
+        variant: variant,
+        detail: detail,
+        weight: totalWeight,
+        quantity: qty,
+        createdAt: newProduct.customDate || new Date().toISOString()
+      }
+
+      const updated = [newEntry, ...products]
+      setProducts(updated)
+      localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updated))
+      await insertSupabaseRecord('products', newEntry)
     }
-
-    const updated = [newEntry, ...products]
-    setProducts(updated)
-    localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updated))
-    await insertSupabaseRecord('products', newEntry)
   }
 
   const deleteProduct = async (id) => {
