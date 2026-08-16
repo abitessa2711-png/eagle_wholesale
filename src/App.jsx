@@ -119,46 +119,94 @@ export default function App() {
     setUser(null)
   }
 
-  // ── Stock Add (with Automatic Existing Product Merging) ───────────────────
+  // ── Universal Text Normalizer & Canonical Formatter ─────────────────────────
+  const normalizeText = (text) => {
+    if (!text) return ''
+    let s = String(text).trim()
+    s = s.replace(/[\"“”″‟']/g, '"')
+    s = s.replace(/\s+/g, ' ')
+    s = s.replace(/கொலுசுகள்/g, 'கொலுசு')
+         .replace(/வளையல்கள்/g, 'வளையல்')
+         .replace(/மெட்டிகள்/g, 'மெட்டி')
+         .replace(/மோதிரங்கள்/g, 'மோதிரம்')
+         .replace(/டாலர்கள்/g, 'டாலர்')
+         .replace(/செயின்கள்/g, 'செயின்')
+         .replace(/காப்புகள்/g, 'காப்பு')
+    s = s.replace(/5\.5/g, '5 1/2')
+         .replace(/6\.5/g, '6 1/2')
+         .replace(/7\.5/g, '7 1/2')
+         .replace(/8\.5/g, '8 1/2')
+         .replace(/9\.5/g, '9 1/2')
+         .replace(/10\.5/g, '10 1/2')
+         .replace(/11\.5/g, '11 1/2')
+    s = s.replace(/மூணு இடம்/g, 'மூன்று இடை')
+         .replace(/மூன்று இடம்/g, 'மூன்று இடை')
+         .replace(/ஒரு இடம்/g, 'ஒரு இடை')
+         .replace(/ஃபுல் முத்து/g, 'புல் முத்து')
+         .replace(/full முத்து/gi, 'புல் முத்து')
+    return s.trim().toLowerCase()
+  }
+
+  const canonicalVariant = (v) => {
+    if (!v) return ''
+    let s = String(v).trim()
+    s = s.replace(/[\"“”″‟']/g, '"').replace(/\s+/g, ' ')
+    s = s.replace(/கொலுசுகள்/g, 'கொலுசு')
+    s = s.replace(/5\.5\"/g, '5 1/2"').replace(/6\.5\"/g, '6 1/2"').replace(/7\.5\"/g, '7 1/2"').replace(/8\.5\"/g, '8 1/2"').replace(/9\.5\"/g, '9 1/2"').replace(/10\.5\"/g, '10 1/2"').replace(/11\.5\"/g, '11 1/2"')
+    return s.trim()
+  }
+
+  const canonicalDetail = (d) => {
+    if (!d) return ''
+    let s = String(d).trim().replace(/\s+/g, ' ')
+    s = s.replace(/மூணு இடம்/g, 'மூன்று இடை').replace(/மூன்று இடம்/g, 'மூன்று இடை')
+    s = s.replace(/ஒரு இடம்/g, 'ஒரு இடை')
+    return s.trim()
+  }
+
+  // ── Stock Add (with Universal Real-Time Database Auto-Merge) ───────────────
   const addProduct = async (newProduct) => {
     const totalWeight = parseFloat(newProduct.weight || 0)
     const qty = parseInt(newProduct.quantity || 1)
     const cat = (newProduct.category || '').trim()
     const subcat = (newProduct.subcategory || '').trim()
-    const variant = (newProduct.variant || '').trim()
-    const detail = (newProduct.detail || '').trim()
+    const variant = canonicalVariant(newProduct.variant)
+    const detail = canonicalDetail(newProduct.detail)
 
-    // Robust Detail Normalizer for matching variants
-    const normDetail = (str) => (str || '').trim()
-      .replace(/மூணு இடம்/g, 'மூன்று இடை')
-      .replace(/மூன்று இடம்/g, 'மூன்று இடை')
-      .replace(/ஒரு இடம்/g, 'ஒரு இடை')
+    // Fetch fresh database records first to avoid any device sync lag
+    const freshDb = await fetchSupabaseData('products')
+    const currentList = (freshDb && freshDb.length > 0) ? freshDb : products
 
-    // Find if identical product already exists in stock
-    const existingIndex = products.findIndex(p =>
-      (p.category || '').trim().toLowerCase() === cat.toLowerCase() &&
-      (p.subcategory || '').trim().toLowerCase() === subcat.toLowerCase() &&
-      (p.variant || '').trim().toLowerCase() === variant.toLowerCase() &&
-      normDetail(p.detail).toLowerCase() === normDetail(detail).toLowerCase()
+    const existingIndex = currentList.findIndex(p =>
+      normalizeText(p.category) === normalizeText(cat) &&
+      normalizeText(p.subcategory) === normalizeText(subcat) &&
+      normalizeText(p.variant) === normalizeText(variant) &&
+      normalizeText(p.detail) === normalizeText(detail)
     )
 
     if (existingIndex !== -1) {
-      // Merge with existing item (increase quantity and total batch weight)
-      const existing = products[existingIndex]
-      const updatedQty = (existing.quantity || 0) + qty
-      const updatedWeight = (existing.weight || 0) + totalWeight
+      // Merge with existing item (increment quantity and total batch weight)
+      const existing = currentList[existingIndex]
+      const updatedQty = (parseInt(existing.quantity) || 0) + qty
+      const updatedWeight = (parseFloat(existing.weight) || 0) + totalWeight
 
       const updatedProd = {
         ...existing,
+        variant: canonicalVariant(existing.variant),
+        detail: canonicalDetail(existing.detail),
         quantity: updatedQty,
         weight: updatedWeight
       }
 
-      const updated = [...products]
-      updated[existingIndex] = updatedProd
+      const updated = currentList.map(p => String(p.id) === String(existing.id) ? updatedProd : p)
       setProducts(updated)
       localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updated))
-      await updateSupabaseRecord('products', existing.id, { quantity: updatedQty, weight: updatedWeight })
+      await updateSupabaseRecord('products', existing.id, {
+        variant: updatedProd.variant,
+        detail: updatedProd.detail,
+        quantity: updatedQty,
+        weight: updatedWeight
+      })
     } else {
       // New distinct product entry
       const newEntry = {
@@ -172,7 +220,7 @@ export default function App() {
         createdAt: newProduct.customDate || new Date().toISOString()
       }
 
-      const updated = [newEntry, ...products]
+      const updated = [newEntry, ...currentList]
       setProducts(updated)
       localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updated))
       await insertSupabaseRecord('products', newEntry)
