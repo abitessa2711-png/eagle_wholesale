@@ -25,6 +25,7 @@ export const KOLUSU_SIZES = [
 export const MASTER_DATA = {
   "கொலுசு": {
     "அளவு": KOLUSU_SIZES,
+    "பாம்பே திருகு மாடல்": KOLUSU_SIZES,
     "சிங்கிள் பட்டி": KOLUSU_SIZES,
     "டபுள் பட்டி": KOLUSU_SIZES,
     "பாம்பே கொலுசு வகைகள்": [
