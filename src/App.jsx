@@ -282,11 +282,65 @@ export default function App() {
     await deleteSupabaseRecord('services', id)
   }
 
-  // ── Sale Delete ────────────────────────────────────────────────────────────
+  // ── Sale Delete (with Automatic Stock Restoration to Inventory) ────────────
   const deleteSale = async (id) => {
-    const updated = soldItems.filter(s => String(s.id) !== String(id))
-    setSoldItems(updated)
-    localStorage.setItem('eagle_wholesale_production_v2_sales', JSON.stringify(updated))
+    const sale = soldItems.find(s => String(s.id) === String(id))
+    
+    if (sale) {
+      const restoreQty = parseInt(sale.quantity || 1)
+      const restoreWeight = parseFloat(sale.weight || 0)
+
+      // Fetch fresh database stock to avoid any stale data
+      const freshDb = await fetchSupabaseData('products')
+      const currentProducts = (freshDb && freshDb.length > 0) ? freshDb : products
+
+      // Match item in inventory by normalized fields
+      const pIdx = currentProducts.findIndex(p =>
+        normalizeText(p.category) === normalizeText(sale.category) &&
+        normalizeText(p.subcategory) === normalizeText(sale.subcategory) &&
+        normalizeText(p.variant) === normalizeText(sale.variant) &&
+        normalizeText(p.detail) === normalizeText(sale.detail)
+      )
+
+      if (pIdx !== -1) {
+        // Increment quantity and weight of existing stock item
+        const existingProd = currentProducts[pIdx]
+        const updatedQty = (parseInt(existingProd.quantity) || 0) + restoreQty
+        const updatedWeight = (parseFloat(existingProd.weight) || 0) + restoreWeight
+
+        const updatedProd = {
+          ...existingProd,
+          quantity: updatedQty,
+          weight: updatedWeight
+        }
+
+        const updatedProds = currentProducts.map(p => String(p.id) === String(existingProd.id) ? updatedProd : p)
+        setProducts(updatedProds)
+        localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updatedProds))
+        await updateSupabaseRecord('products', existingProd.id, { quantity: updatedQty, weight: updatedWeight })
+      } else {
+        // Re-create product item in inventory
+        const newProd = {
+          id: String(Date.now()),
+          category: sale.category,
+          subcategory: sale.subcategory || '',
+          variant: canonicalVariant(sale.variant),
+          detail: canonicalDetail(sale.detail),
+          quantity: restoreQty,
+          weight: restoreWeight,
+          createdAt: new Date().toISOString()
+        }
+        const updatedProds = [newProd, ...currentProducts]
+        setProducts(updatedProds)
+        localStorage.setItem('eagle_wholesale_production_v2_products', JSON.stringify(updatedProds))
+        await insertSupabaseRecord('products', newProd)
+      }
+    }
+
+    // Delete sale record from sales
+    const updatedSales = soldItems.filter(s => String(s.id) !== String(id))
+    setSoldItems(updatedSales)
+    localStorage.setItem('eagle_wholesale_production_v2_sales', JSON.stringify(updatedSales))
     await deleteSupabaseRecord('sales', id)
   }
 

@@ -86,7 +86,7 @@ const SoldItems = ({ soldItems = [], onDeleteSale }) => {
                       style={{ padding: '4px' }}
                       title="நீக்கு (Delete)"
                       onClick={() => {
-                        if (confirm('இந்தப் விற்பனைப் பதிவை நீக்க விரும்புகிறீர்களா? (Delete this sale entry?)')) {
+                        if (confirm('இந்தப் விற்பனைப் பதிவை நீக்க விரும்புகிறீர்களா? நீக்கினால் இதன் அளவு மற்றும் எடை மீண்டும் நேரடி இருப்பில் சேர்க்கப்படும். (Delete this sale entry & restore stock to inventory?)')) {
                           onDeleteSale && onDeleteSale(item.id)
                         }
                       }}
@@ -139,7 +139,7 @@ const SoldItems = ({ soldItems = [], onDeleteSale }) => {
                 className="btn btn-danger-ghost"
                 style={{ padding: '4px 8px', height: '28px', fontSize: '11px' }}
                 onClick={() => {
-                  if (confirm('இந்தப் விற்பனைப் பதிவை நீக்க விரும்புகிறீர்களா? (Delete this sale entry?)')) {
+                  if (confirm('இந்தப் விற்பனைப் பதிவை நீக்க விரும்புகிறீர்களா? நீக்கினால் இதன் அளவு மற்றும் எடை மீண்டும் நேரடி இருப்பில் சேர்க்கப்படும். (Delete this sale entry & restore stock to inventory?)')) {
                     onDeleteSale && onDeleteSale(item.id)
                   }
                 }}
