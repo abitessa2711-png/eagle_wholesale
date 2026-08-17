@@ -148,6 +148,7 @@ export default function App() {
          .replace(/ஃபுல் முத்து/g, 'புல் முத்து')
          .replace(/full முத்து/gi, 'புல் முத்து')
          .replace(/சித்து மெட்டி/g, 'சுத்து மெட்டி')
+         .replace(/உருட்டு நெளிவு மெட்டி/g, 'நெளிவு மெட்டி')
     return s.trim().toLowerCase()
   }
 
@@ -157,6 +158,7 @@ export default function App() {
     s = s.replace(/[\"“”″‟']/g, '"').replace(/\s+/g, ' ')
     s = s.replace(/கொலுசுகள்/g, 'கொலுசு')
     s = s.replace(/சித்து மெட்டி/g, 'சுத்து மெட்டி')
+    s = s.replace(/உருட்டு நெளிவு மெட்டி/g, 'நெளிவு மெட்டி')
     s = s.replace(/5\.5\"/g, '5 1/2"').replace(/6\.5\"/g, '6 1/2"').replace(/7\.5\"/g, '7 1/2"').replace(/8\.5\"/g, '8 1/2"').replace(/9\.5\"/g, '9 1/2"').replace(/10\.5\"/g, '10 1/2"').replace(/11\.5\"/g, '11 1/2"')
     return s.trim()
   }
