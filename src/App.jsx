@@ -149,6 +149,7 @@ export default function App() {
          .replace(/full முத்து/gi, 'புல் முத்து')
          .replace(/சித்து மெட்டி/g, 'சுத்து மெட்டி')
          .replace(/உருட்டு நெளிவு மெட்டி/g, 'நெளிவு மெட்டி')
+         .replace(/மிலி/g, 'மல்லி')
     return s.trim().toLowerCase()
   }
 
